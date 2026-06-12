@@ -35,9 +35,9 @@
       <!-- Doctor summary -->
       <div style="background:var(--primary-light);border:1px solid var(--primary-mid);border-radius:var(--radius);padding:.85rem 1rem;display:flex;align-items:center;gap:.9rem;margin-bottom:1.5rem;">
         <div class="doctor-av" style="width:46px;height:46px;font-size:1rem;flex-shrink:0;"
-             th:text="${#strings.toUpperCase(#strings.substring(slot.doctor.fullname,0,2))}">BS</div>
+             th:text="${#strings.toUpperCase(#strings.substring(slot.doctor.fullName,0,2))}">BS</div>
         <div style="flex:1">
-          <div style="font-size:.95rem;font-weight:700;" th:text="${slot.doctor.fullname}">Bác sĩ</div>
+          <div style="font-size:.95rem;font-weight:700;" th:text="${slot.doctor.fullName}">Bác sĩ</div>
           <div style="font-size:.82rem;color:var(--primary);font-style:italic;">
             📅 <span th:text="${#temporals.format(slot.date,'EEEE, dd/MM/yyyy',new java.util.Locale('vi'))}"></span>
             &nbsp;·&nbsp;
