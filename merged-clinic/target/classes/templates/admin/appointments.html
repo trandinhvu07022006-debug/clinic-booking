@@ -24,7 +24,7 @@
       <div><div class="profile-name">Quản trị viên</div><div class="profile-role">Admin</div></div>
     </div>
     <a th:href="@{/admin/dashboard}"    class="nav-link">📊&nbsp; Dashboard</a>
-    <a th:href="@{/admin/doctors}"      class="nav-link">👨‍⚕️&nbsp; Bác sĩ</a>
+    <a th:href="@{/admin/doctors}"       class="nav-link">👨‍⚕️&nbsp; Bác sĩ</a>
     <a th:href="@{/admin/appointments}" class="nav-link active">📋&nbsp; Lịch hẹn</a>
     <div style="margin-top:auto;padding-top:2rem;">
       <a th:href="@{/auth/admin/logout}" class="nav-link" style="color:#f87171;">⏻&nbsp; Đăng xuất</a>
@@ -41,7 +41,6 @@
     </div>
 
     <div class="table-wrap">
-      <!-- Filter bar -->
       <div class="filter-bar">
         <button class="filter-chip active" onclick="filterTable('')">Tất cả</button>
         <button class="filter-chip" onclick="filterTable('CONFIRMED')">✓ Đã xác nhận</button>
@@ -84,13 +83,13 @@
                 th:text="${a.symptoms ?: '—'}"></td>
             <td>
               <span th:class="${a.status.name()=='CONFIRMED' ? 'badge badge-success'  :
-                                a.status.name()=='COMPLETED' ? 'badge badge-muted'    :
-                                a.status.name()=='CANCELLED' ? 'badge badge-danger'   :
-                                'badge badge-pending'}"
+                                   a.status.name()=='COMPLETED' ? 'badge badge-muted'    :
+                                   a.status.name()=='CANCELLED' ? 'badge badge-danger'   :
+                                   'badge badge-pending'}"
                     th:text="${a.status.name()=='CONFIRMED' ? '✓ Xác nhận'    :
-                               a.status.name()=='COMPLETED' ? '🏁 Hoàn thành' :
-                               a.status.name()=='CANCELLED' ? '✕ Đã hủy'     :
-                               '⏳ Chờ OTP'}"></span>
+                                   a.status.name()=='COMPLETED' ? '🏁 Hoàn thành' :
+                                   a.status.name()=='CANCELLED' ? '✕ Đã hủy'    :
+                                   '⏳ Chờ OTP'}"></span>
             </td>
           </tr>
         </tbody>
@@ -109,7 +108,12 @@ function filterTable(status) {
 </script>
 <script th:src="@{/js/app.js}"></script>
 <script>
-if(window.innerWidth<=768){var mb=document.createElement("div");mb.style="display:flex;background:var(--primary-dark);padding:.75rem 1rem;position:sticky;top:0;z-index:200;align-items:center;gap:.75rem;";mb.innerHTML="<button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>";document.body.insertBefore(mb,document.querySelector(".dash-wrap"));}
+if(window.innerWidth <= 768){
+    var mb = document.createElement("div");
+    mb.style = "display:flex;background:var(--primary-dark);padding:.75rem 1rem;position:sticky;top:0;z-index:200;align-items:center;gap:.75rem;";
+    mb.innerHTML = '<button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>';
+    document.body.insertBefore(mb, document.querySelector(".dash-wrap"));
+}
 </script>
 </body>
 </html>
