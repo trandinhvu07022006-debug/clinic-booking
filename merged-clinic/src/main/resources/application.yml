@@ -1,0 +1,61 @@
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+
+spring:
+  application:
+    name: clinic-booking
+  
+  # ── DATABASE ──────────────────────────────────────────────
+  datasource:
+    url: jdbc:h2:mem:clinicdb;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+  h2:
+    console:
+      enabled: false
+      
+  # ── TEMPLATE & MESSAGES ───────────────────────────────────
+  thymeleaf:
+    cache: false
+    encoding: UTF-8
+  messages:
+    encoding: UTF-8
+
+  # ── EMAIL OTP ─────────────────────────────────────────────
+  mail:
+    host: smtp.gmail.com
+    port: 465
+    username: ${MAIL_USERNAME:YOUR_EMAIL@gmail.com}
+    password: ${MAIL_PASSWORD:YOUR_APP_PASSWORD}
+    protocol: smtps
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+          timeout: 10000
+          connectiontimeout: 10000
+
+# ── OTP CONFIG ────────────────────────────────────────────
+otp:
+  email:
+    expiry-seconds: 300
+  max-attempts: 5
+  lockout-minutes: 15
+  app-name: PhongKhamDemo
+
+# ── CLINIC INFO ───────────────────────────────────────────
+clinic:
+  name: Phòng Khám Đa Khoa Yên Lãng
+  address: 120 Yên Lãng, Đống Đa, Hà Nội
+  phone: 1900-8888
