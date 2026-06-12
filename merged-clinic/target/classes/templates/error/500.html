@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>500 — Lỗi hệ thống</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <style>
+    body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg)}
+    .err-wrap{text-align:center;max-width:420px;padding:2rem}
+    .err-code{font-size:6rem;font-weight:700;color:#fca5a5;line-height:1;margin-bottom:.25rem}
+  </style>
+</head>
+<body>
+<div class="err-wrap">
+  <div class="err-code">500</div>
+  <div style="font-size:3rem;margin-bottom:1rem;">⚠️</div>
+  <div style="font-size:1.5rem;font-weight:700;color:var(--text);margin-bottom:.65rem">Lỗi hệ thống</div>
+  <div style="font-size:.95rem;color:var(--text-muted);margin-bottom:2rem;line-height:1.7">Đã xảy ra lỗi không mong muốn. Đội kỹ thuật đã được thông báo.<br/>Vui lòng thử lại sau ít phút.</div>
+  <a th:href="@{/}" class="btn btn-primary">🏥 Về trang chủ</a>
+</div>
+</body>
+</html>

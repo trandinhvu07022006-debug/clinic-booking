@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Đăng nhập bác sĩ</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body class="auth-page">
+<div class="auth-card">
+  <div class="card">
+    <div class="card-header" style="text-align:center;padding:2rem 1.75rem 1.5rem;">
+      <div style="width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.5rem;">🏥</div>
+      <h2>Cổng bác sĩ</h2>
+      <p class="sub" th:text="${clinicName}">Phòng Khám — Khu vực nội bộ</p>
+    </div>
+
+    <!-- Tabs -->
+    <div style="display:flex;background:var(--primary-light);border-bottom:1px solid var(--border);">
+      <div style="flex:1;padding:.7rem .5rem;text-align:center;font-size:.82rem;font-weight:700;color:var(--primary-dark);border-bottom:2px solid var(--primary);background:#fff;display:flex;align-items:center;justify-content:center;gap:.35rem;">
+        🔒 Bước 1: Mật khẩu
+      </div>
+      <div style="flex:1;padding:.7rem .5rem;text-align:center;font-size:.82rem;color:var(--text-muted);display:flex;align-items:center;justify-content:center;gap:.35rem;">
+        🛡 Bước 2: TOTP
+      </div>
+    </div>
+
+    <div class="card-body">
+      <!-- Step indicator -->
+      <div style="display:flex;align-items:center;justify-content:center;gap:.5rem;margin-bottom:1.25rem;">
+        <div style="width:22px;height:8px;background:var(--primary);border-radius:4px;"></div>
+        <div style="width:8px;height:8px;background:var(--primary-mid);border-radius:50%;"></div>
+        <span style="font-size:.78rem;color:var(--primary);font-style:italic;margin-left:.25rem;">Nhập tên đăng nhập &amp; mật khẩu</span>
+      </div>
+
+      <!-- Lockout warning -->
+      <div th:if="${lockWarning}" class="alert alert-warn">
+        ⚠️ <span th:text="${lockWarning}"></span>
+      </div>
+      <div th:if="${error}" class="alert alert-error">
+        ⚠️ <span th:text="${error}"></span>
+      </div>
+
+      <form th:action="@{/auth/doctor/login}" method="post">
+        <div class="form-group">
+          <label class="form-label">Tên đăng nhập</label>
+          <input type="text" name="username" required placeholder="Tên đăng nhập" autofocus/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mật khẩu</label>
+          <div class="input-wrap">
+            <input type="password" name="password" id="pw" required placeholder="••••••••"/>
+            <button type="button" onclick="togglePw()"
+              style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:1rem;">👁</button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full btn-lg">
+          Tiếp theo →
+        </button>
+      </form>
+
+      <div style="text-align:center;margin-top:.85rem;font-size:.85rem;color:var(--primary);cursor:pointer;">
+        ❓ Quên mật khẩu?
+      </div>
+    </div>
+
+    <div style="background:var(--primary-light);border-top:1px solid var(--border);padding:.75rem 1rem;text-align:center;font-size:.78rem;color:var(--text-muted);font-style:italic;">
+      🛡 Bảo mật 2 lớp: BCrypt + TOTP (Google Authenticator)
+    </div>
+  </div>
+</div>
+<script>function togglePw(){const p=document.getElementById('pw');p.type=p.type==='password'?'text':'password';}</script>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

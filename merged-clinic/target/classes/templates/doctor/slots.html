@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Quản lý slot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div id="sidebarOverlay" class="sidebar-overlay"></div>
+<div class="dash-wrap">
+
+  <aside class="dash-sidebar">
+    <div style="font-size:.82rem;color:#a0d4be;margin-bottom:1.25rem;font-style:italic;"
+         th:text="${clinicName}">Phòng Khám</div>
+    <div class="profile">
+      <div class="profile-av"
+           th:text="${#strings.toUpperCase(#strings.substring(doctor.fullName,0,2))}">BS</div>
+      <div>
+        <div class="profile-name" th:text="${doctor.fullName}">Bác sĩ</div>
+        <div class="profile-role" th:text="${doctor.specialty}">Chuyên khoa</div>
+      </div>
+    </div>
+    <a th:href="@{/doctor/dashboard}" class="nav-link">🏠&nbsp; Dashboard</a>
+    <a th:href="@{/doctor/slots}"     class="nav-link active">⏰&nbsp; Quản lý slot</a>
+    <div style="margin-top:auto;padding-top:2rem;">
+      <a th:href="@{/auth/doctor/logout}" class="nav-link" style="color:#f87171;">⏻&nbsp; Đăng xuất</a>
+    </div>
+  </aside>
+
+  <div class="dash-main">
+    <div class="dash-header">
+      <div>
+        <h2 style="margin-bottom:.15rem;">Quản lý giờ khám</h2>
+        <div style="font-size:.82rem;color:var(--text-muted);font-style:italic;">
+          Tạo slot 30 phút / slot tự động
+        </div>
+      </div>
+    </div>
+
+    <!-- Generate form -->
+    <div class="card" style="margin-bottom:1.25rem;max-width:560px;">
+      <div style="padding:.85rem 1.1rem;border-bottom:1px solid var(--border);font-weight:700;">
+        ➕ Tạo slot mới
+      </div>
+      <div style="padding:1.25rem;">
+        <form th:action="@{/doctor/slots/generate}" method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;align-items:end;margin-bottom:1rem;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Ngày</label>
+              <input type="date" name="date"
+                     th:value="${selectedDate}"
+                     th:min="${T(java.time.LocalDate).now()}" required/>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Từ giờ</label>
+              <input type="time" name="fromTime" value="08:00" required/>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Đến giờ</label>
+              <input type="time" name="toTime" value="12:00" required/>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            ⚡ Tạo slot (30 phút / slot)
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Slot list -->
+    <div class="table-wrap">
+      <div style="padding:.85rem 1.1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-weight:700;">
+          Slot ngày
+          <span th:text="${#temporals.format(selectedDate,'dd/MM/yyyy')}"></span>
+        </span>
+        <span class="badge badge-primary" th:text="${slots.size()} + ' slot trống'"></span>
+      </div>
+
+      <div th:if="${slots.isEmpty()}"
+           style="padding:2.5rem;text-align:center;color:var(--text-muted);">
+        <div style="font-size:2rem;margin-bottom:.6rem;">📭</div>
+        Chưa có slot nào cho ngày này. Tạo slot phía trên để bắt đầu.
+      </div>
+
+      <div th:if="${!slots.isEmpty()}" style="padding:1.25rem;">
+        <div style="font-size:.8rem;color:var(--text-muted);margin-bottom:.75rem;font-style:italic;">
+          Tất cả slot đang ở trạng thái <strong>còn trống</strong> — bệnh nhân có thể đặt lịch
+        </div>
+        <div class="slot-grid">
+          <div th:each="s : ${slots}"
+               style="padding:.6rem .5rem;border:1px solid var(--primary-mid);border-radius:var(--radius);background:var(--primary-light);text-align:center;font-size:.88rem;font-weight:700;color:var(--primary-dark);">
+            <span th:text="${s.startTime}"></span>
+            <span style="font-size:.72rem;font-weight:400;color:var(--text-muted);display:block;font-style:italic;">Còn trống</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<script th:src="@{/js/app.js}"></script>
+<script>
+if(window.innerWidth<=768){var mb=document.createElement("div");mb.style="display:flex;background:var(--primary-dark);padding:.75rem 1rem;position:sticky;top:0;z-index:200;align-items:center;gap:.75rem;";mb.innerHTML="<button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>";document.body.insertBefore(mb,document.querySelector(".dash-wrap"));}
+</script>
+</body>
+</html>

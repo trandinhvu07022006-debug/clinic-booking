@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<aside th:fragment="sidebar(active)" class="dash-sidebar">
+  <div class="profile">
+    <div class="profile-av"
+         th:text="${#strings.toUpperCase(#strings.substring(doctor.fullName,0,2))}">BS</div>
+    <div>
+      <div class="profile-name" th:text="${doctor.fullName}">Bác sĩ</div>
+      <div class="profile-role" th:text="${doctor.specialty}">Chuyên khoa</div>
+    </div>
+  </div>
+  <a th:href="@{/doctor/dashboard}" th:classappend="${active=='dashboard'}?' active':''" class="nav-link">🏠 Dashboard</a>
+  <a th:href="@{/doctor/slots}"     th:classappend="${active=='slots'}?' active':''"    class="nav-link">⏰ Quản lý slot</a>
+  <div style="margin-top:auto;padding-top:1.5rem;">
+    <a th:href="@{/auth/doctor/logout}" class="nav-link" style="color:#f87171;">⏻ Đăng xuất</a>
+  </div>
+</aside>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Xác thực TOTP</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body class="auth-page">
+<div class="auth-card">
+  <div class="card">
+    <div class="card-header" style="text-align:center;padding:2rem 1.75rem 1.5rem;">
+      <div style="width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.5rem;">📱</div>
+      <h2>Xác thực 2 bước</h2>
+      <p class="sub">Mã từ Google Authenticator</p>
+    </div>
+
+    <!-- Tabs -->
+    <div style="display:flex;background:var(--primary-light);border-bottom:1px solid var(--border);">
+      <div style="flex:1;padding:.7rem .5rem;text-align:center;font-size:.82rem;color:var(--text-muted);display:flex;align-items:center;justify-content:center;gap:.35rem;">
+        🔒 Bước 1: Mật khẩu
+      </div>
+      <div style="flex:1;padding:.7rem .5rem;text-align:center;font-size:.82rem;font-weight:700;color:var(--primary-dark);border-bottom:2px solid var(--primary);background:#fff;display:flex;align-items:center;justify-content:center;gap:.35rem;">
+        🛡 Bước 2: TOTP
+      </div>
+    </div>
+
+    <div class="card-body">
+      <!-- Step indicator -->
+      <div style="display:flex;align-items:center;justify-content:center;gap:.5rem;margin-bottom:1.25rem;">
+        <div style="width:8px;height:8px;background:var(--primary-mid);border-radius:50%;"></div>
+        <div style="width:22px;height:8px;background:var(--primary);border-radius:4px;"></div>
+        <span style="font-size:.78rem;color:var(--primary);font-style:italic;margin-left:.25rem;">Nhập mã từ ứng dụng xác thực</span>
+      </div>
+
+      <!-- TOTP timer -->
+      <div class="alert alert-info" style="margin-bottom:1.25rem;">
+        <div style="width:100%;">
+          <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.45rem;">
+            <span>⏱ Mã làm mới mỗi 30 giây</span>
+            <span style="font-weight:700;" id="tSec">--</span>s
+          </div>
+          <div style="height:5px;background:#dbeafe;border-radius:4px;overflow:hidden;">
+            <div id="tBar" style="height:100%;background:#3b82f6;border-radius:4px;transition:width 1s linear;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error -->
+      <div th:if="${error}" class="alert alert-error">
+        ⚠️ <span th:text="${error}"></span>
+      </div>
+
+      <form th:action="@{/auth/doctor/verify-totp}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        <div class="form-group">
+          <label class="form-label">Mã TOTP (6 chữ số)</label>
+          <div class="otp-inputs">
+            <input class="otp-box" id="o1" maxlength="1" inputmode="numeric" autofocus/>
+            <input class="otp-box" id="o2" maxlength="1" inputmode="numeric"/>
+            <input class="otp-box" id="o3" maxlength="1" inputmode="numeric"/>
+            <input class="otp-box" id="o4" maxlength="1" inputmode="numeric"/>
+            <input class="otp-box" id="o5" maxlength="1" inputmode="numeric"/>
+            <input class="otp-box" id="o6" maxlength="1" inputmode="numeric"/>
+          </div>
+          <input type="hidden" name="otpCode" id="totpHidden"/>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full btn-lg" id="totpSubmit">
+          Xác thực ✓
+        </button>
+      </form>
+
+      <div style="text-align:center;margin-top:.85rem;">
+        <a th:href="@{/auth/doctor/login}" style="font-size:.85rem;color:var(--text-muted);">← Quay lại bước 1</a>
+      </div>
+    </div>
+
+    <div style="background:var(--primary-light);border-top:1px solid var(--border);padding:.75rem 1rem;text-align:center;font-size:.78rem;color:var(--text-muted);font-style:italic;">
+      🛡 Bước 2 / 2 &nbsp;·&nbsp; RFC 6238 TOTP
+    </div>
+  </div>
+</div>
+
+<script>
+// TOTP countdown
+(function(){
+  const bar = document.getElementById('tBar'), sec = document.getElementById('tSec');
+  function tick(){
+    const r = 30 - (Math.floor(Date.now()/1000) % 30);
+    bar.style.width = (r/30*100) + '%';
+    sec.textContent = r;
+    bar.style.background = r<=5 ? '#ef4444' : r<=10 ? '#f59e0b' : '#3b82f6';
+  }
+  tick(); setInterval(tick, 1000);
+})();
+
+// OTP input auto-advance
+const boxes = Array.from(document.querySelectorAll('.otp-box'));
+const hidden = document.getElementById('totpHidden');
+const update = () => hidden.value = boxes.map(b=>b.value).join('');
+boxes.forEach((b,i) => {
+  b.addEventListener('input', () => {
+    b.value = b.value.replace(/\D/g,'');
+    update();
+    if(b.value && boxes[i+1]) boxes[i+1].focus();
+  });
+  b.addEventListener('keydown', e => {
+    if(e.key==='Backspace' && !b.value && boxes[i-1]) boxes[i-1].focus();
+  });
+});
+</script>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

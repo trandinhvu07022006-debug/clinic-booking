@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Tất cả lịch hẹn</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <style>
+    .filter-bar{display:flex;gap:.65rem;flex-wrap:wrap;padding:.85rem 1.1rem;border-bottom:1px solid var(--border);background:var(--bg-secondary);}
+    .filter-chip{padding:.3rem .9rem;border-radius:20px;border:1px solid var(--border);font-size:.8rem;font-family:'Tinos',serif;cursor:pointer;background:#fff;color:var(--text-muted);transition:all .15s;}
+    .filter-chip.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+  </style>
+</head>
+<body>
+<div id="sidebarOverlay" class="sidebar-overlay"></div>
+<div class="dash-wrap">
+
+  <aside class="dash-sidebar" style="background:linear-gradient(180deg,#134e4a,#0d9488);">
+    <div style="font-size:.82rem;color:#a0d4be;margin-bottom:1.25rem;font-style:italic;"
+         th:text="${clinicName}">Phòng Khám</div>
+    <div class="profile">
+      <div class="profile-av">AD</div>
+      <div><div class="profile-name">Quản trị viên</div><div class="profile-role">Admin</div></div>
+    </div>
+    <a th:href="@{/admin/dashboard}"    class="nav-link">📊&nbsp; Dashboard</a>
+    <a th:href="@{/admin/doctors}"      class="nav-link">👨‍⚕️&nbsp; Bác sĩ</a>
+    <a th:href="@{/admin/appointments}" class="nav-link active">📋&nbsp; Lịch hẹn</a>
+    <div style="margin-top:auto;padding-top:2rem;">
+      <a th:href="@{/auth/admin/logout}" class="nav-link" style="color:#f87171;">⏻&nbsp; Đăng xuất</a>
+    </div>
+  </aside>
+
+  <div class="dash-main">
+    <div class="dash-header">
+      <div>
+        <h2 style="margin-bottom:.15rem;">Tất cả lịch hẹn</h2>
+        <div style="font-size:.82rem;color:var(--text-muted);font-style:italic;"
+             th:text="${appointments.size()} + ' lịch hẹn'"></div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <!-- Filter bar -->
+      <div class="filter-bar">
+        <button class="filter-chip active" onclick="filterTable('')">Tất cả</button>
+        <button class="filter-chip" onclick="filterTable('CONFIRMED')">✓ Đã xác nhận</button>
+        <button class="filter-chip" onclick="filterTable('COMPLETED')">🏁 Đã khám</button>
+        <button class="filter-chip" onclick="filterTable('PENDING_OTP')">⏳ Chờ OTP</button>
+        <button class="filter-chip" onclick="filterTable('CANCELLED')">✕ Đã hủy</button>
+      </div>
+
+      <div th:if="${appointments.isEmpty()}"
+           style="padding:2.5rem;text-align:center;color:var(--text-muted);">
+        Chưa có lịch hẹn nào.
+      </div>
+
+      <table th:if="${!appointments.isEmpty()}" id="apptTable">
+        <thead>
+          <tr>
+            <th>#</th><th>Bệnh nhân</th><th>Bác sĩ</th>
+            <th>Ngày</th><th>Giờ</th><th>Triệu chứng</th><th>Trạng thái</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="a : ${appointments}" th:data-status="${a.status.name()}">
+            <td style="font-size:.78rem;color:var(--text-muted);" th:text="'#' + ${a.id}"></td>
+            <td>
+              <div style="font-weight:700;" th:text="${a.patientName}"></div>
+              <div style="font-size:.75rem;color:var(--text-muted);" th:text="${a.patientPhone}"></div>
+              <div style="font-size:.72rem;color:var(--text-muted);font-style:italic;"
+                   th:text="${a.patientEmail}"></div>
+            </td>
+            <td>
+              <div style="font-weight:700;" th:text="${a.slot.doctor.fullName}"></div>
+              <div style="font-size:.75rem;color:var(--primary);font-style:italic;"
+                   th:text="${a.slot.doctor.specialty}"></div>
+            </td>
+            <td style="white-space:nowrap;"
+                th:text="${#temporals.format(a.slot.date,'dd/MM/yyyy')}"></td>
+            <td style="font-weight:700;color:var(--primary);white-space:nowrap;"
+                th:text="${a.slot.startTime}"></td>
+            <td style="font-size:.82rem;max-width:160px;color:var(--text-muted);"
+                th:text="${a.symptoms ?: '—'}"></td>
+            <td>
+              <span th:class="${a.status.name()=='CONFIRMED' ? 'badge badge-success'  :
+                                a.status.name()=='COMPLETED' ? 'badge badge-muted'    :
+                                a.status.name()=='CANCELLED' ? 'badge badge-danger'   :
+                                'badge badge-pending'}"
+                    th:text="${a.status.name()=='CONFIRMED' ? '✓ Xác nhận'    :
+                               a.status.name()=='COMPLETED' ? '🏁 Hoàn thành' :
+                               a.status.name()=='CANCELLED' ? '✕ Đã hủy'     :
+                               '⏳ Chờ OTP'}"></span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script>
+function filterTable(status) {
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  event.target.classList.add('active');
+  document.querySelectorAll('#apptTable tbody tr').forEach(row => {
+    row.style.display = (!status || row.dataset.status === status) ? '' : 'none';
+  });
+}
+</script>
+<script th:src="@{/js/app.js}"></script>
+<script>
+if(window.innerWidth<=768){var mb=document.createElement("div");mb.style="display:flex;background:var(--primary-dark);padding:.75rem 1rem;position:sticky;top:0;z-index:200;align-items:center;gap:.75rem;";mb.innerHTML="<button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>";document.body.insertBefore(mb,document.querySelector(".dash-wrap"));}
+</script>
+</body>
+</html>

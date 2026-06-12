@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Đăng nhập Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body class="auth-page">
+<div class="auth-card">
+  <div class="card">
+    <div class="card-header" style="text-align:center;padding:2rem 1.75rem 1.5rem;background:linear-gradient(160deg,#134e4a,#0d9488);">
+      <div style="width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.5rem;">🛡</div>
+      <h2>Quản trị viên</h2>
+      <p class="sub" th:text="${clinicName}">Phòng Khám</p>
+    </div>
+
+    <div class="card-body">
+      <div th:if="${error}"        class="alert alert-error">⚠️ <span th:text="${error}"></span></div>
+      <div th:if="${param.logout}" class="alert alert-success">✓ Đã đăng xuất thành công.</div>
+
+      <form th:action="@{/auth/admin/login}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        <div class="form-group">
+          <label class="form-label">Tên đăng nhập</label>
+          <input type="text" name="username" value="admin" required autofocus/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mật khẩu</label>
+          <div class="input-wrap">
+            <input type="password" name="password" id="pw" required placeholder="••••••••"/>
+            <button type="button" onclick="document.getElementById('pw').type=document.getElementById('pw').type==='password'?'text':'password'"
+              style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);">👁</button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full btn-lg">Đăng nhập →</button>
+      </form>
+
+      <div style="text-align:center;margin-top:.85rem;">
+        <a th:href="@{/}" style="font-size:.85rem;color:var(--text-muted);">← Về trang đặt lịch</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

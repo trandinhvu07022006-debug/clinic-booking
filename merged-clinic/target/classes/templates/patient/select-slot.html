@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Chọn giờ khám</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body style="background:var(--bg)">
+<nav>
+  <a class="nav-brand" th:href="@{/}">
+    <div class="nav-logo-box">+</div>
+    <span class="nav-name" th:text="${clinicName}">Phòng Khám</span>
+  </a>
+  <a th:href="@{/}" class="btn btn-outline btn-sm">← Đổi bác sĩ</a>
+</nav>
+
+<div class="container-sm" style="padding:1.75rem 1.25rem;">
+
+  <!-- Steps -->
+  <div class="card" style="margin-bottom:1.1rem;">
+    <div class="steps">
+      <div class="step"><div class="step-dot done">✓</div><span class="step-label">Bác sĩ</span></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-dot active">2</div><span class="step-label active">Giờ khám</span></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-dot todo">3</div><span class="step-label">Thông tin</span></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-dot todo">4</div><span class="step-label">Xác nhận</span></div>
+    </div>
+    <!-- Doctor summary -->
+    <div style="padding:.85rem 1.25rem;display:flex;align-items:center;gap:.9rem;">
+      <div class="doctor-av" style="width:44px;height:44px;font-size:.95rem;flex-shrink:0;"
+           th:text="${#strings.toUpperCase(#strings.substring(doctor.fullName,0,2))}">BS</div>
+      <div>
+        <div style="font-weight:700;" th:text="${doctor.fullName}">Bác sĩ</div>
+        <div style="font-size:.82rem;color:var(--primary);font-style:italic;" th:text="${doctor.specialty}">Chuyên khoa</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:1.1rem;align-items:start;">
+
+    <!-- Mini Calendar -->
+    <div>
+      <div style="font-size:.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:.55rem;">Chọn ngày</div>
+      <div id="miniCal"></div>
+    </div>
+
+    <!-- Slot list -->
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.55rem;">
+        <div style="font-size:.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;">
+          Giờ trống — <span id="selDateLabel"
+               th:text="${#temporals.format(selectedDate,'dd/MM/yyyy')}"></span>
+        </div>
+        <span class="badge badge-primary" id="slotCountBadge"
+              th:text="${slots.size()} + ' slot'"></span>
+      </div>
+
+      <form method="get" th:action="@{/booking/form}" id="slotForm">
+        <input type="hidden" name="slotId" id="selectedSlotId"/>
+
+        <!-- Empty state -->
+        <div th:if="${slots.isEmpty()}"
+             style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:2.5rem 1rem;text-align:center;color:var(--text-muted);">
+          <div style="font-size:1.8rem;margin-bottom:.6rem;">📭</div>
+          <div style="font-weight:700;margin-bottom:.25rem;">Không có slot trống</div>
+          <div style="font-size:.82rem;">Chọn ngày khác ←</div>
+        </div>
+
+        <div th:if="${!slots.isEmpty()}">
+          <!-- AM slots -->
+          <div style="font-size:.75rem;font-weight:700;color:var(--text-muted);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.03em;">🌤 Buổi sáng</div>
+          <div class="slot-grid" style="margin-bottom:1rem;">
+            <div th:each="s : ${slots}" th:if="${s.startTime.hour < 12}"
+                 class="slot-btn"
+                 th:data-id="${s.id}"
+                 th:data-time="${s.startTime}"
+                 onclick="pickSlot(this)">
+              <span th:text="${s.startTime}"></span>
+              <small style="display:block;font-size:.68rem;font-weight:400;color:var(--primary);font-style:italic;">Còn trống</small>
+            </div>
+          </div>
+          <!-- PM slots -->
+          <div style="font-size:.75rem;font-weight:700;color:var(--text-muted);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.03em;">🌇 Buổi chiều</div>
+          <div class="slot-grid" style="margin-bottom:1.25rem;">
+            <div th:each="s : ${slots}" th:if="${s.startTime.hour >= 12}"
+                 class="slot-btn"
+                 th:data-id="${s.id}"
+                 th:data-time="${s.startTime}"
+                 onclick="pickSlot(this)">
+              <span th:text="${s.startTime}"></span>
+              <small style="display:block;font-size:.68rem;font-weight:400;color:var(--primary);font-style:italic;">Còn trống</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Confirm bar -->
+        <div id="confirmBar" style="display:none;background:var(--primary);border-radius:10px;padding:.85rem 1.1rem;display:none;align-items:center;justify-content:space-between;gap:.75rem;">
+          <div>
+            <div style="font-size:.75rem;color:rgba(255,255,255,.75);">Đã chọn:</div>
+            <div style="font-weight:700;color:#fff;font-size:1rem;" id="selectedLabel">—</div>
+          </div>
+          <button type="submit" class="btn" id="continueBtn"
+                  style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3);"
+                  disabled>Tiếp theo →</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script th:src="@{/js/app.js}"></script>
+<script th:inline="javascript">
+  const doctorId   = /*[[${doctor.id}]]*/ 0;
+  const initDate   = /*[[${selectedDate}]]*/ '';
+  const contextPath = /*[[@{/}]]*/ '/';
+
+  // Mini Calendar
+  MiniCal({
+    containerId: 'miniCal',
+    selectedDate: initDate,
+    onSelect(iso) {
+      window.location.href = contextPath + 'booking/slots?doctorId=' + doctorId + '&date=' + iso;
+    }
+  });
+
+  function pickSlot(el) {
+    document.querySelectorAll('.slot-btn').forEach(b => {
+      b.style.background = ''; b.style.borderColor = ''; b.style.color = '';
+      b.querySelector('small').style.color = '';
+    });
+    el.style.background = 'var(--primary)';
+    el.style.borderColor = 'var(--primary)';
+    el.style.color = '#fff';
+    el.querySelector('small').style.color = 'rgba(255,255,255,.8)';
+    document.getElementById('selectedSlotId').value = el.dataset.id;
+    const time = el.dataset.time;
+    const [h,m] = time.split(':').map(Number);
+    const end = String(Math.floor((h*60+m+30)/60)).padStart(2,'0') + ':' + String((h*60+m+30)%60).padStart(2,'0');
+    document.getElementById('selectedLabel').textContent = time + ' – ' + end;
+    const bar = document.getElementById('confirmBar');
+    bar.style.display = 'flex';
+    document.getElementById('continueBtn').disabled = false;
+  }
+</script>
+</body>
+</html>

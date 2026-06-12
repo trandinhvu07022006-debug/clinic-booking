@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>404 — Không tìm thấy trang</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <style>
+    body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg)}
+    .err-wrap{text-align:center;max-width:420px;padding:2rem}
+    .err-code{font-size:6rem;font-weight:700;color:var(--primary-mid);line-height:1;margin-bottom:.25rem}
+    .err-title{font-size:1.5rem;font-weight:700;color:var(--text);margin-bottom:.65rem}
+    .err-desc{font-size:.95rem;color:var(--text-muted);margin-bottom:2rem;line-height:1.7}
+  </style>
+</head>
+<body>
+<div class="err-wrap">
+  <div class="err-code">404</div>
+  <div style="font-size:3rem;margin-bottom:1rem;">🔍</div>
+  <div class="err-title">Không tìm thấy trang</div>
+  <div class="err-desc">Trang bạn đang tìm không tồn tại hoặc đã bị di chuyển.<br/>Kiểm tra lại đường dẫn hoặc quay về trang chủ.</div>
+  <div style="display:flex;gap:.75rem;justify-content:center;">
+    <a th:href="@{/}" class="btn btn-primary">🏥 Về trang chủ</a>
+    <button onclick="history.back()" class="btn btn-outline">← Quay lại</button>
+  </div>
+</div>
+</body>
+</html>

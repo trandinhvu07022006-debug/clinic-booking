@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<aside th:fragment="sidebar(active)" class="dash-sidebar" style="background:linear-gradient(180deg,#134e4a,#0d9488);">
+  <div class="profile">
+    <div class="profile-av">AD</div>
+    <div>
+      <div class="profile-name">Quản trị viên</div>
+      <div class="profile-role" th:text="${clinicName}">Phòng Khám</div>
+    </div>
+  </div>
+  <a th:href="@{/admin/dashboard}"    th:classappend="${active=='dashboard'}?' active':''"    class="nav-link">📊 Dashboard</a>
+  <a th:href="@{/admin/doctors}"      th:classappend="${active=='doctors'}?' active':''"      class="nav-link">👨‍⚕️ Bác sĩ</a>
+  <a th:href="@{/admin/appointments}" th:classappend="${active=='appointments'}?' active':''" class="nav-link">📋 Lịch hẹn</a>
+  <div style="margin-top:auto;padding-top:1.5rem;">
+    <a th:href="@{/auth/admin/logout}" class="nav-link" style="color:#f87171;">⏻ Đăng xuất</a>
+  </div>
+</aside>
+</body>
+</html>

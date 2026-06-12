@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Đặt lịch khám</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body style="background:var(--bg);padding:1.5rem 1rem;">
+
+<div class="container-sm">
+  <div class="card">
+    <!-- Header -->
+    <div class="card-header">
+      <a th:href="@{/booking/slots(doctorId=${slot.doctor.id})}"
+         style="color:rgba(255,255,255,.7);font-size:.85rem;display:inline-flex;align-items:center;gap:.35rem;margin-bottom:.85rem;">
+        ← Quay lại chọn giờ
+      </a>
+      <h2 style="margin-bottom:.2rem;">Thông tin đặt lịch</h2>
+      <p class="sub">Bước 3/4 — Điền thông tin bệnh nhân</p>
+    </div>
+
+    <!-- Step bar -->
+    <div class="steps">
+      <div class="step"><div class="step-dot done">✓</div><span class="step-label">Bác sĩ</span></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-dot done">✓</div><span class="step-label">Giờ khám</span></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-dot active">3</div><span class="step-label active">Thông tin</span></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-dot todo">4</div><span class="step-label">Xác nhận</span></div>
+    </div>
+
+    <div class="card-body">
+      <!-- Doctor summary -->
+      <div style="background:var(--primary-light);border:1px solid var(--primary-mid);border-radius:var(--radius);padding:.85rem 1rem;display:flex;align-items:center;gap:.9rem;margin-bottom:1.5rem;">
+        <div class="doctor-av" style="width:46px;height:46px;font-size:1rem;flex-shrink:0;"
+             th:text="${#strings.toUpperCase(#strings.substring(slot.doctor.name,0,2))}">BS</div>
+        <div style="flex:1">
+          <div style="font-size:.95rem;font-weight:700;" th:text="${slot.doctor.name}">Bác sĩ</div>
+          <div style="font-size:.82rem;color:var(--primary);font-style:italic;">
+            📅 <span th:text="${#temporals.format(slot.date,'EEEE, dd/MM/yyyy',new java.util.Locale('vi'))}"></span>
+            &nbsp;·&nbsp;
+            <span th:text="${#temporals.format(slot.startTime,'HH:mm')}"></span>
+          </div>
+        </div>
+        <span class="badge badge-primary">30 phút</span>
+      </div>
+
+      <!-- Error -->
+      <div th:if="${error}" class="alert alert-error">
+        ⚠️ <span th:text="${error}">Lỗi</span>
+      </div>
+
+      <!-- Form -->
+      <form th:action="@{/booking/submit}" method="post">
+        <input type="hidden" name="slotId" th:value="${slot.id}"/>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Họ và tên <span class="req">*</span></label>
+            <input type="text" name="patientName" required placeholder="Nguyễn Văn A"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Số điện thoại <span class="req">*</span></label>
+            <input type="text" name="patientPhone" required placeholder="0901 234 567"/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email nhận OTP <span class="req">*</span></label>
+          <input type="email" name="patientEmail" required placeholder="email@example.com"/>
+          <div style="font-size:.78rem;color:var(--text-muted);margin-top:.3rem;font-style:italic;">
+            Mã OTP sẽ được gửi tới địa chỉ này — kiểm tra cả hộp thư rác.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Triệu chứng / Lý do khám</label>
+          <textarea name="symptoms" placeholder="Mô tả ngắn gọn triệu chứng hoặc mục đích khám…" rows="3"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full btn-lg">
+          Gửi &amp; Nhận OTP →
+        </button>
+        <div style="text-align:center;font-size:.78rem;color:var(--text-muted);margin-top:.65rem;font-style:italic;">
+          🔒 Mã OTP hiệu lực 5 phút
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+d:\Java\clinic-merged-v4\merged-clinic\src\main\java\com\clinic\repository\DoctorRepository.java
+d:\Java\clinic-merged-v4\merged-clinic\src\main\java\com\clinic\model\TimeSlot.java
+d:\Java\clinic-merged-v4\merged-clinic\src\main\java\com\clinic\service\AppointmentService.java
+d:\Java\clinic-merged-v4\merged-clinic\src\main\java\com\clinic\config\DataSeeder.java
+d:\Java\clinic-merged-v4\merged-clinic\src\main\java\com\clinic\controller\DoctorAuthController.java
+d:\Java\clinic-merged-v4\merged-clinic\src\main\java\com\clinic\repository\AppointmentRepository.java
+d:\Java\clinic-merged-v4\merged-clinic\src\main\java\com\clinic\model\Doctor.java
+d:\Java\clinic-merged-v4\merged-clinic\src\main\java\com\clinic\service\AppointmentOtpService.java
+d:\Java\clinic-merged-v4\merged-clinic\src\main\java\com\clinic\service\TOTPService.java
+d:\Java\clinic-merged-v4\merged-clinic\src\main\java\com\clinic\model\Appointment.java
+d:\Java\clinic-merged-v4\merged-clinic\src\main\java\com\clinic\ClinicApplication.java
+d:\Java\clinic-merged-v4\merged-clinic\src\main\java\com\clinic\controller\BookingController.java
+d:\Java\clinic-merged-v4\merged-clinic\src\main\java\com\clinic\repository\TimeSlotRepository.java
+d:\Java\clinic-merged-v4\merged-clinic\src\main\java\com\clinic\service\DoctorService.java
+d:\Java\clinic-merged-v4\merged-clinic\src\main\java\com\clinic\config\SecurityConfig.java
+d:\Java\clinic-merged-v4\merged-clinic\src\main\java\com\clinic\controller\AdminController.java
+d:\Java\clinic-merged-v4\merged-clinic\src\main\java\com\clinic\controller\DoctorDashboardController.java

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title th:text="${clinicName} + ' – Đặt lịch khám'">Phòng Khám</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <style>
+    /* ── HERO ── */
+    .hero-section{position:relative;padding:5rem 1.5rem 4rem;text-align:center;overflow:hidden}
+    .hero-img{position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat}
+    .hero-overlay{position:absolute;inset:0;background:rgba(10,50,35,.72);backdrop-filter:blur(2px)}
+    .hero-inner{position:relative;z-index:1;max-width:680px;margin:0 auto}
+    .hero-inner h1{font-size:2.4rem;font-weight:700;color:#fff;margin-bottom:.6rem;line-height:1.2;letter-spacing:-.01em}
+    .hero-inner p{font-size:1.05rem;color:#a0d4be;margin-bottom:2rem;font-style:italic}
+
+    /* ── SEARCH BAR ── */
+    .search-wrap{background:#fff;border-radius:12px;padding:.65rem .65rem .65rem 1.1rem;display:flex;align-items:center;gap:.65rem;box-shadow:0 8px 32px rgba(0,0,0,.18);max-width:560px;margin:0 auto 1.25rem}
+    .search-wrap input{flex:1;border:none;outline:none;font-size:1rem;font-family:'Tinos',serif;color:#1a3d2e;background:transparent}
+    .search-wrap input::placeholder{color:#9ab}
+    .btn-search{padding:.6rem 1.25rem;background:var(--primary);color:#fff;border:none;border-radius:9px;font-size:.95rem;font-weight:700;font-family:'Tinos',serif;cursor:pointer;white-space:nowrap;transition:background .15s}
+    .btn-search:hover{background:var(--primary-dark)}
+
+    /* ── HERO BADGES ── */
+    .hero-badges{display:flex;gap:.65rem;justify-content:center;flex-wrap:wrap}
+    .hb{display:inline-flex;align-items:center;gap:.4rem;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#d0f0e0;font-size:.82rem;padding:.35rem .85rem;border-radius:20px;backdrop-filter:blur(4px)}
+
+    /* ── TRUST STRIP ── */
+    .trust-strip{background:#fff;border-bottom:1px solid var(--border)}
+    .trust-inner{max-width:900px;margin:0 auto;display:flex;flex-wrap:wrap;justify-content:center}
+    .trust-item{flex:1;min-width:160px;padding:1.25rem 1rem;text-align:center;border-right:1px solid var(--border-light)}
+    .trust-item:last-child{border-right:none}
+    .trust-num{font-size:1.9rem;font-weight:700;color:var(--primary);line-height:1}
+    .trust-label{font-size:.8rem;color:var(--text-muted);margin-top:.25rem;font-style:italic}
+
+    /* ── FILTER ── */
+    .filter-row{display:flex;gap:.55rem;flex-wrap:wrap;margin-bottom:1.5rem;align-items:center}
+    .fc{padding:.38rem 1rem;border-radius:20px;border:1px solid var(--border);font-size:.85rem;font-family:'Tinos',serif;font-weight:700;cursor:pointer;background:#fff;color:var(--text-muted);transition:all .15s}
+    .fc:hover{border-color:var(--primary);color:var(--primary-dark)}
+    .fc.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+    /* ── DOCTOR CARDS ── */
+    .doc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem}
+    @media(max-width:800px){.doc-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:520px){.doc-grid{grid-template-columns:1fr}}
+
+    .doc-card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;transition:all .18s;cursor:pointer;text-decoration:none}
+    .doc-card:hover{border-color:var(--primary-mid);box-shadow:0 8px 24px rgba(26,107,82,.10);transform:translateY(-3px);text-decoration:none}
+    .doc-card-top{background:linear-gradient(135deg,var(--primary-light),#fff);padding:1.25rem 1.25rem .9rem;display:flex;gap:.9rem;align-items:flex-start}
+    .doc-av-wrap{position:relative;flex-shrink:0}
+    .doc-av{width:52px;height:52px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;color:#fff;border:2px solid var(--primary-mid)}
+    .slot-dot{position:absolute;bottom:1px;right:1px;width:13px;height:13px;border-radius:50%;border:2px solid #fff}
+    .slot-dot.has-slots{background:#22c55e}
+    .slot-dot.no-slots{background:#94a3b8}
+    .doc-name{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:.2rem}
+    .doc-spec{font-size:.8rem;color:var(--primary);font-style:italic;margin-bottom:.4rem}
+    .doc-stars{display:flex;align-items:center;gap:.25rem;font-size:.78rem;color:#f59e0b}
+    .doc-card-mid{padding:.6rem 1.25rem;font-size:.82rem;color:var(--text-muted);line-height:1.6;flex:1;border-top:1px solid var(--border-light)}
+    .doc-card-foot{padding:.7rem 1.25rem;border-top:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between}
+    .slot-badge{font-size:.78rem;font-weight:700;display:flex;align-items:center;gap:.3rem}
+    .slot-badge.has{color:#16a34a}
+    .slot-badge.none{color:var(--text-muted)}
+    .btn-book-sm{padding:.4rem .95rem;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:.82rem;font-weight:700;font-family:'Tinos',serif;cursor:pointer;transition:background .15s}
+    .btn-book-sm:hover{background:var(--primary-dark)}
+
+    /* ── WHY US ── */
+    .why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem}
+    @media(max-width:640px){.why-grid{grid-template-columns:1fr}}
+    .why-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.5rem;text-align:center}
+    .why-icon{font-size:2rem;margin-bottom:.75rem}
+    .why-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:.4rem}
+    .why-desc{font-size:.85rem;color:var(--text-muted);line-height:1.65}
+
+    /* ── FOOTER ── */
+    .site-footer{background:var(--primary-dark);color:#a0d4be;padding:2.5rem 1.5rem 1.5rem;margin-top:0}
+    .footer-grid{max-width:900px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr;gap:2rem}
+    @media(max-width:640px){.footer-grid{grid-template-columns:1fr}}
+    .footer-brand{font-size:1.05rem;font-weight:700;color:#fff;margin-bottom:.6rem}
+    .footer-desc{font-size:.85rem;line-height:1.7}
+    .footer-col-title{font-size:.75rem;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.65rem}
+    .footer-col-item{font-size:.85rem;margin-bottom:.3rem}
+    .footer-bottom{max-width:900px;margin:1.5rem auto 0;padding-top:1.1rem;border-top:1px solid rgba(255,255,255,.1);text-align:center;font-size:.78rem;font-style:italic}
+
+    /* ── SECTION ── */
+    .section{padding:3rem 1.5rem}
+    .section-title{font-size:1.3rem;font-weight:700;color:var(--text);margin-bottom:.4rem}
+    .section-sub{font-size:.9rem;color:var(--text-muted);font-style:italic;margin-bottom:1.5rem}
+    .section-inner{max-width:960px;margin:0 auto}
+
+    /* ── NO RESULT ── */
+    .no-result{display:none;text-align:center;padding:3rem 1rem;color:var(--text-muted)}
+    .no-result.visible{display:block}
+  </style>
+</head>
+<body style="background:var(--bg)">
+
+<!-- ── NAV ── -->
+<nav style="position:sticky;top:0;z-index:200;">
+  <a class="nav-brand" th:href="@{/}">
+    <div class="nav-logo-box">+</div>
+    <span class="nav-name" th:text="${clinicName}">Phòng Khám</span>
+  </a>
+  <div style="display:flex;align-items:center;gap:.6rem">
+    <a th:href="@{/auth/doctor/login}" class="btn btn-outline btn-sm">Bác sĩ</a>
+    <a th:href="@{/auth/admin/login}"  class="btn btn-primary btn-sm">Quản trị</a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<div class="hero-section">
+  <div class="hero-img"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-inner">
+    <h1 th:text="${clinicName}">Phòng Khám Đa Khoa</h1>
+    <p>Uy tín · Chất lượng · Chuyên nghiệp — Đặt lịch không cần tài khoản</p>
+
+    <!-- Search bar -->
+    <div class="search-wrap" id="searchWrap">
+      <svg width="18" height="18" fill="none" stroke="#9ab" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" id="searchInput"
+             placeholder="Tìm tên bác sĩ hoặc chuyên khoa…"
+             oninput="filterDoctors()" autocomplete="off"/>
+      <button class="btn-search" onclick="filterDoctors()">Tìm kiếm</button>
+    </div>
+
+    <!-- Hero badges -->
+    <div class="hero-badges">
+      <span class="hb">✓ Không cần tài khoản</span>
+      <span class="hb">🔐 Xác nhận OTP email</span>
+      <span class="hb">⚡ Đặt lịch trong 2 phút</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── TRUST STRIP ── -->
+<div class="trust-strip">
+  <div class="trust-inner">
+    <div class="trust-item">
+      <div class="trust-num" th:text="${totalCompleted > 0 ? totalCompleted + '+' : '100+'}">100+</div>
+      <div class="trust-label">Lịch hẹn đã khám</div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-num" th:text="${doctors.size() + '+'}">3+</div>
+      <div class="trust-label">Bác sĩ chuyên khoa</div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-num">4.9 ★</div>
+      <div class="trust-label">Đánh giá trung bình</div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-num">5+</div>
+      <div class="trust-label">Năm kinh nghiệm</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── DOCTOR SECTION ── -->
+<div class="section">
+  <div class="section-inner">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1rem;">
+      <div>
+        <div class="section-title">Đội ngũ bác sĩ</div>
+        <div class="section-sub" th:text="${doctors.size()} + ' bác sĩ sẵn sàng đặt lịch hôm nay'"></div>
+      </div>
+    </div>
+
+    <!-- Filter chips -->
+    <div class="filter-row" id="filterRow">
+      <span class="fc active" onclick="setFilter('', this)">Tất cả</span>
+      <span th:each="spec : ${specialties}"
+            th:text="${spec}"
+            th:data-spec="${spec}"
+            class="fc"
+            onclick="setFilter(this.dataset.spec, this)">Chuyên khoa</span>
+    </div>
+
+    <!-- Doctor grid -->
+    <div class="doc-grid" id="docGrid">
+      <a th:each="doc : ${doctors}"
+         th:href="@{/booking/slots(doctorId=${doc.id})}"
+         class="doc-card"
+         th:data-name="${#strings.toLowerCase(doc.fullName)}"
+         th:data-spec="${doc.specialty}">
+
+        <div class="doc-card-top">
+          <div class="doc-av-wrap">
+            <div class="doc-av"
+                 th:text="${#strings.toUpperCase(#strings.substring(doc.fullName,0,2))}">BS</div>
+            <div th:class="${slotCounts[doc.id] > 0 ? 'slot-dot has-slots' : 'slot-dot no-slots'}"></div>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div class="doc-name" th:text="${doc.fullName}">Bác sĩ</div>
+            <div class="doc-spec" th:text="${doc.specialty}">Chuyên khoa</div>
+            <div class="doc-stars">
+              ★★★★★
+              <span style="color:var(--text-muted);margin-left:.2rem;">4.9</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="doc-card-mid"
+             th:text="${doc.bio != null ? doc.bio : 'Bác sĩ giàu kinh nghiệm, tận tâm với bệnh nhân.'}">
+          Giới thiệu bác sĩ.
+        </div>
+
+        <div class="doc-card-foot">
+          <span th:if="${slotCounts[doc.id] > 0}"
+                class="slot-badge has">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            <span th:text="${slotCounts[doc.id]} + ' slot hôm nay'"></span>
+          </span>
+          <span th:if="${slotCounts[doc.id] == 0}"
+                class="slot-badge none">
+            📅 Đặt ngày khác
+          </span>
+          <span class="btn-book-sm">Đặt lịch →</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- No result -->
+    <div class="no-result" id="noResult">
+      <div style="font-size:2.5rem;margin-bottom:.75rem;">🔍</div>
+      <div style="font-weight:700;margin-bottom:.35rem;">Không tìm thấy bác sĩ</div>
+      <div style="font-size:.88rem;">Thử tìm với từ khóa khác hoặc chọn "Tất cả".</div>
+    </div>
+
+    <!-- Empty DB -->
+    <div th:if="${#lists.isEmpty(doctors)}"
+         style="text-align:center;padding:3rem;background:#fff;border:1px solid var(--border);border-radius:14px;color:var(--text-muted);margin-top:1rem;">
+      <div style="font-size:2rem;margin-bottom:.65rem;">👨‍⚕️</div>
+      Chưa có bác sĩ nào. Quản trị viên vui lòng thêm bác sĩ trước.
+    </div>
+  </div>
+</div>
+
+<!-- ── WHY US ── -->
+<div class="section" style="background:var(--primary-light);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+  <div class="section-inner">
+    <div class="section-title" style="text-align:center;">Tại sao chọn chúng tôi?</div>
+    <div class="section-sub" style="text-align:center;margin-bottom:1.75rem;">Trải nghiệm đặt lịch đơn giản, an toàn và nhanh chóng</div>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-icon">⚡</div>
+        <div class="why-title">Đặt lịch nhanh 2 phút</div>
+        <div class="why-desc">Không cần tạo tài khoản. Chọn bác sĩ, chọn giờ, điền thông tin và xác nhận qua email.</div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">🔐</div>
+        <div class="why-title">Xác nhận OTP bảo mật</div>
+        <div class="why-desc">Mỗi lịch hẹn được xác nhận bằng mã OTP gửi riêng tới email — không ai có thể đặt lịch thay bạn.</div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">🩺</div>
+        <div class="why-title">Bác sĩ chuyên khoa</div>
+        <div class="why-desc">Đội ngũ bác sĩ nhiều năm kinh nghiệm, được đào tạo chuyên sâu từ các bệnh viện lớn.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── FOOTER ── -->
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand">🏥 <span th:text="${clinicName}">Phòng Khám</span></div>
+      <div class="footer-desc">Uy tín · Chất lượng · Chuyên nghiệp.<br/>Mang lại dịch vụ y tế tốt nhất cho bạn và gia đình.</div>
+    </div>
+    <div>
+      <div class="footer-col-title">Liên hệ</div>
+      <div class="footer-col-item">📞 <span th:text="${clinicPhone}"></span></div>
+      <div class="footer-col-item">📍 <span th:text="${clinicAddress}"></span></div>
+      <div class="footer-col-item">📧 hotro@clinic.vn</div>
+    </div>
+    <div>
+      <div class="footer-col-title">Giờ làm việc</div>
+      <div class="footer-col-item">Thứ 2 – Thứ 6: 07:00 – 17:00</div>
+      <div class="footer-col-item">Thứ 7: 07:00 – 12:00</div>
+      <div class="footer-col-item" style="color:#6ee7b7;">Chủ nhật: Nghỉ</div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    © 2026 <span th:text="${clinicName}">Phòng Khám</span> · Hệ thống đặt lịch trực tuyến an toàn với OTP
+  </div>
+</footer>
+
+<script>
+let currentSpec = '';
+
+function setFilter(spec, el) {
+  currentSpec = spec;
+  document.querySelectorAll('.fc').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  filterDoctors();
+}
+
+function filterDoctors() {
+  const q   = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+  const cards = document.querySelectorAll('.doc-card');
+  let visible = 0;
+
+  cards.forEach(card => {
+    const name = (card.dataset.name || '');
+    const spec = (card.dataset.spec || '');
+    const matchQ    = !q || name.includes(q) || spec.toLowerCase().includes(q);
+    const matchSpec = !currentSpec || spec === currentSpec;
+    const show = matchQ && matchSpec;
+    card.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+
+  const nr = document.getElementById('noResult');
+  if (nr) nr.classList.toggle('visible', visible === 0 && cards.length > 0);
+}
+</script>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

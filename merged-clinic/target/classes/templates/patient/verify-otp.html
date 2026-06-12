@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Xác nhận OTP</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body style="background:var(--bg);padding:1.5rem 1rem;">
+
+<div class="container-sm">
+  <div class="card">
+    <div class="card-header" style="text-align:center;padding:2rem 1.75rem 1.5rem;">
+      <div class="check-circle" style="width:68px;height:68px;font-size:1.8rem;">📧</div>
+      <h2 style="margin-bottom:.35rem;">Kiểm tra email của bạn</h2>
+      <p class="sub">
+        Mã OTP gửi tới: <strong th:text="${maskedEmail}"></strong><br/>
+        Hiệu lực <strong>5 phút</strong> — kiểm tra cả thư rác.
+      </p>
+    </div>
+
+    <!-- Step bar -->
+    <div class="steps">
+      <div class="step"><div class="step-dot done">✓</div><span class="step-label">Bác sĩ</span></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-dot done">✓</div><span class="step-label">Giờ khám</span></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-dot done">✓</div><span class="step-label">Thông tin</span></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-dot active">4</div><span class="step-label active">Xác nhận</span></div>
+    </div>
+
+    <div class="card-body">
+      <!-- Countdown -->
+      <div style="margin-bottom:1.25rem;">
+        <div class="countdown-track"><div class="countdown-fill" id="cFill" style="width:100%"></div></div>
+        <div style="text-align:center;font-size:.82rem;color:var(--primary);margin-top:.4rem;font-style:italic;" id="cLabel">
+          ⏱ Còn lại 5:00
+        </div>
+      </div>
+
+      <!-- Error / info -->
+      <div th:if="${error}"   class="alert alert-error">⚠️ <span th:text="${error}"></span></div>
+      <div th:if="${message}" class="alert alert-success">✓ <span th:text="${message}"></span></div>
+
+      <!-- OTP form -->
+      <form th:action="@{/booking/verify/{id}(id=${appointment.id})}" method="post">
+        <div style="text-align:center;margin-bottom:.75rem;font-size:.88rem;color:var(--text-sub);">
+          Nhập mã 6 chữ số
+        </div>
+        <div class="otp-inputs">
+          <input class="otp-box" maxlength="1" id="o1" autocomplete="off" inputmode="numeric"/>
+          <input class="otp-box" maxlength="1" id="o2" autocomplete="off" inputmode="numeric"/>
+          <input class="otp-box" maxlength="1" id="o3" autocomplete="off" inputmode="numeric"/>
+          <input class="otp-box" maxlength="1" id="o4" autocomplete="off" inputmode="numeric"/>
+          <input class="otp-box" maxlength="1" id="o5" autocomplete="off" inputmode="numeric"/>
+          <input class="otp-box" maxlength="1" id="o6" autocomplete="off" inputmode="numeric"/>
+        </div>
+        <input type="hidden" name="otpCode" id="otpHidden"/>
+
+        <!-- Appointment summary -->
+        <div style="background:var(--primary-light);border:1px solid var(--primary-mid);border-radius:var(--radius);padding:.85rem 1rem;margin:1.1rem 0;font-size:.88rem;">
+          <strong>📋 Lịch hẹn của bạn</strong><br/>
+          <span th:text="${appointment.slot.doctor.name}"></span>
+          &nbsp;·&nbsp;
+          <span th:text="${#temporals.format(appointment.slot.startTime,'dd/MM/yyyy HH:mm')}"></span>
+          <br/>
+          Bệnh nhân: <strong th:text="${appointment.patientName}"></strong>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full btn-lg" id="submitBtn">
+          Xác nhận đặt lịch ✓
+        </button>
+      </form>
+
+      <!-- Resend -->
+      <form th:action="@{/booking/resend-otp/{id}(id=${appointment.id})}" method="post" style="margin-top:.75rem;">
+        <button type="submit" class="btn btn-outline btn-full">
+          🔄 Gửi lại mã OTP
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+// Auto-advance OTP inputs
+const boxes = document.querySelectorAll('.otp-box');
+const hidden = document.getElementById('otpHidden');
+const update = () => hidden.value = Array.from(boxes).map(b=>b.value).join('');
+boxes.forEach((b,i)=>{
+  b.addEventListener('input',()=>{
+    b.value = b.value.replace(/\D/g,'');
+    update();
+    if(b.value && boxes[i+1]) boxes[i+1].focus();
+    if(hidden.value.length===6) document.getElementById('submitBtn').style.background='var(--primary-dark)';
+  });
+  b.addEventListener('keydown',e=>{
+    if(e.key==='Backspace'&&!b.value&&boxes[i-1]) boxes[i-1].focus();
+  });
+});
+
+// Countdown 5 minutes
+let secs = 300;
+const fill = document.getElementById('cFill');
+const lbl  = document.getElementById('cLabel');
+const timer = setInterval(()=>{
+  secs--;
+  if(secs<=0){ clearInterval(timer); lbl.textContent='⏱ Mã đã hết hạn — gửi lại.'; fill.style.width='0%'; fill.style.background='#c0392b'; return; }
+  const pct = Math.round(secs/300*100);
+  fill.style.width = pct+'%';
+  if(secs<60){ fill.style.background='#c0392b'; }
+  const m = Math.floor(secs/60), s = secs%60;
+  lbl.textContent = `⏱ Còn lại ${m}:${String(s).padStart(2,'0')}`;
+},1000);
+</script>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>
