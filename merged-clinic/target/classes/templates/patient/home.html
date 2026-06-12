@@ -113,7 +113,8 @@
   <div class="hero-overlay"></div>
   <div class="hero-inner">
     <h1 th:text="${clinicName}">Phòng Khám Đa Khoa</h1>
-    <p>Uy tín · Chất lượng · Chuyên nghiệp — Đặt lịch không cần tài khoản</p>
+    <p>Uy tín - Chất lượng - Chuyên nghiệp 
+       Đặt lịch không cần tài khoản</p>
 
     <!-- Search bar -->
     <div class="search-wrap" id="searchWrap">
@@ -122,13 +123,6 @@
              placeholder="Tìm tên bác sĩ hoặc chuyên khoa…"
              oninput="filterDoctors()" autocomplete="off"/>
       <button class="btn-search" onclick="filterDoctors()">Tìm kiếm</button>
-    </div>
-
-    <!-- Hero badges -->
-    <div class="hero-badges">
-      <span class="hb">✓ Không cần tài khoản</span>
-      <span class="hb">🔐 Xác nhận OTP email</span>
-      <span class="hb">⚡ Đặt lịch trong 2 phút</span>
     </div>
   </div>
 </div>
@@ -271,7 +265,7 @@
       <div class="footer-col-title">Liên hệ</div>
       <div class="footer-col-item">📞 <span th:text="${clinicPhone}"></span></div>
       <div class="footer-col-item">📍 <span th:text="${clinicAddress}"></span></div>
-      <div class="footer-col-item">📧 hotro@clinic.vn</div>
+      <div class="footer-col-item">📧 taytucha@clinic.vn</div>
     </div>
     <div>
       <div class="footer-col-title">Giờ làm việc</div>
