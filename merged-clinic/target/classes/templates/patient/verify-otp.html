@@ -61,7 +61,7 @@
         <!-- Appointment summary -->
         <div style="background:var(--primary-light);border:1px solid var(--primary-mid);border-radius:var(--radius);padding:.85rem 1rem;margin:1.1rem 0;font-size:.88rem;">
           <strong>📋 Lịch hẹn của bạn</strong><br/>
-          <span th:text="${appointment.slot.doctor.name}"></span>
+          <span th:text="${appointment.slot.doctor.fullName}"></span>
           &nbsp;·&nbsp;
           <span th:text="${#temporals.format(appointment.slot.startTime,'dd/MM/yyyy HH:mm')}"></span>
           <br/>

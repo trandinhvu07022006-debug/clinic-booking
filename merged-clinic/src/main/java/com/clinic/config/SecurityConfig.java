@@ -62,9 +62,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            // ĐÃ SỬA: Tắt CSRF để cho phép submit Form (POST) mà không bị lỗi 403
+            .csrf(csrf -> csrf.disable())
+            
             .authorizeHttpRequests(auth -> auth
-                // Public: trang đặt lịch của bệnh nhân
-                .requestMatchers("/", "/booking/**", "/css/**", "/js/**", "/images/**").permitAll()
+                // ĐÃ SỬA: Thêm "/error" vào danh sách Public để trình duyệt hiển thị đúng mã lỗi thật
+                .requestMatchers("/", "/booking/**", "/css/**", "/js/**", "/images/**", "/error").permitAll()
                 // Doctor routes
                 .requestMatchers("/doctor/**").hasRole("DOCTOR")
                 // Admin routes
