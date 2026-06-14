@@ -10,18 +10,26 @@
   <link rel="stylesheet" th:href="@{/css/style.css}" />
   <style>
     /* ── HERO ── */
+    .page-bg{
+      position:fixed;
+      inset:0;
+      z-index:-1;
+      background:url('/images/benhvienbr.jpg') center 70% / cover no-repeat
+    }
+
     .hero-section {
       position: relative;
       padding: 5rem 1.5rem 4rem;
       text-align: center;
-      overflow: hidden
+      overflow: hidden;
+      background: transparent
     }
-
-    .hero-img {
-  position: absolute;
-  inset: 0;
-  background: url('/images/benhvienbr.jpg') center 70% / cover no-repeat
-}
+    .page-bg{
+      position:fixed;
+      inset:0;
+      z-index:-1;
+      background:url('/images/benhvienbr.jpg') center 70% / cover no-repeat
+    }
 
    .hero-overlay {
   position: absolute;
@@ -121,10 +129,23 @@
     }
 
     /* ── TRUST STRIP ── */
-    .trust-strip {
-      background: #fff;
-      border-bottom: 1px solid var(--border)
-    }
+    body {
+  background: var(--bg)
+}
+
+.trust-strip {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  z-index: 1
+}
+
+.section {
+  padding: 3rem 1.5rem;
+  background: var(--bg);
+  position: relative;
+  z-index: 1
+}
 
     .trust-inner {
       max-width: 900px;
@@ -352,13 +373,8 @@
     .why-section{
       position:relative;
       padding:3rem 1.5rem;
-      overflow:hidden
-    }
-
-    .why-bg{
-      position:absolute;
-      inset:0;
-      background:url('/images/benhvienbr.jpg') center 70% / cover no-repeat
+      overflow:hidden;
+      background:transparent
     }
 
    .why-overlay{
@@ -480,8 +496,11 @@
     }
 
     /* ── SECTION ── */
-    .section {
-      padding: 3rem 1.5rem
+   .section {
+      padding: 3rem 1.5rem;
+      background: var(--bg);
+      position: relative;
+      z-index: 1
     }
 
     .section-title {
@@ -518,7 +537,7 @@
 </head>
 
 <body style="background:var(--bg)">
-
+  <div class="page-bg"></div>
   <nav style="position:sticky;top:0;z-index:200;">
     <a class="nav-brand" th:href="@{/}">
       <img th:src="@{/images/logo.png}" alt="Logo Yên Lãng"
@@ -532,7 +551,6 @@
   </nav>
 
   <div class="hero-section">
-    <div class="hero-img"></div>
     <div class="hero-overlay"></div>
     <div class="hero-inner">
       <h1 th:text="${clinicName}">Phòng Khám Đa Khoa</h1>
@@ -644,7 +662,6 @@
   </div>
 
 <div class="why-section">
-    <div class="why-bg"></div>
     <div class="why-overlay"></div>
     <div class="section-inner" style="position:relative;z-index:1;">
       <div class="section-title" style="text-align:center;color:#fff;">Tại sao chọn chúng tôi?</div>
