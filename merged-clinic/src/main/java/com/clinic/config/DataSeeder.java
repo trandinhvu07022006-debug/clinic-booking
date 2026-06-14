@@ -21,10 +21,10 @@ public class DataSeeder {
                                       TOTPService totpService,
                                       PasswordEncoder passwordEncoder) {
         return args -> {
-            // ---- Bác sĩ demo ----
+            //Bác sĩ và slot demo
             try {
                 Doctor d1 = doctorService.createDoctor(
-                    "dr.nam", "password123",
+                    "dr.vu", "password123",
                     "BS. Trần Đình Vũ", "vu@clinic.com", "0901234561",
                     "Ung thư học",
                     "Nhà tôi 3 đời chữa các bệnh về ung thư ai mắc ung thư cũng đến tôi chữa khỏi"
