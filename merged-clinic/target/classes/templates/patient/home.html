@@ -95,7 +95,6 @@
 </head>
 <body style="background:var(--bg)">
 
-<!-- ── NAV ── -->
 <nav style="position:sticky;top:0;z-index:200;">
   <a class="nav-brand" th:href="@{/}">
     <img th:src="@{/logo.png}" alt="Logo Yên Lãng" style="width: 45px; height: auto; vertical-align: middle; margin-right: 8px;" />
@@ -107,7 +106,6 @@
   </div>
 </nav>
 
-<!-- ── HERO ── -->
 <div class="hero-section">
   <div class="hero-img"></div>
   <div class="hero-overlay"></div>
@@ -116,7 +114,6 @@
     <p>Uy tín - Chất lượng - Chuyên nghiệp 
        Đặt lịch không cần tài khoản</p>
 
-    <!-- Search bar -->
     <div class="search-wrap" id="searchWrap">
       <svg width="18" height="18" fill="none" stroke="#9ab" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
       <input type="text" id="searchInput"
@@ -127,7 +124,6 @@
   </div>
 </div>
 
-<!-- ── TRUST STRIP ── -->
 <div class="trust-strip">
   <div class="trust-inner">
     <div class="trust-item">
@@ -149,7 +145,6 @@
   </div>
 </div>
 
-<!-- ── DOCTOR SECTION ── -->
 <div class="section">
   <div class="section-inner">
     <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1rem;">
@@ -159,7 +154,6 @@
       </div>
     </div>
 
-    <!-- Filter chips -->
     <div class="filter-row" id="filterRow">
       <span class="fc active" onclick="setFilter('', this)">Tất cả</span>
       <span th:each="spec : ${specialties}"
@@ -169,7 +163,6 @@
             onclick="setFilter(this.dataset.spec, this)">Chuyên khoa</span>
     </div>
 
-    <!-- Doctor grid -->
     <div class="doc-grid" id="docGrid">
       <a th:each="doc : ${doctors}"
          th:href="@{/booking/slots(doctorId=${doc.id})}"
@@ -213,14 +206,12 @@
       </a>
     </div>
 
-    <!-- No result -->
     <div class="no-result" id="noResult">
       <div style="font-size:2.5rem;margin-bottom:.75rem;">🔍</div>
       <div style="font-weight:700;margin-bottom:.35rem;">Không tìm thấy bác sĩ</div>
       <div style="font-size:.88rem;">Thử tìm với từ khóa khác hoặc chọn "Tất cả".</div>
     </div>
 
-    <!-- Empty DB -->
     <div th:if="${#lists.isEmpty(doctors)}"
          style="text-align:center;padding:3rem;background:#fff;border:1px solid var(--border);border-radius:14px;color:var(--text-muted);margin-top:1rem;">
       <div style="font-size:2rem;margin-bottom:.65rem;">👨‍⚕️</div>
@@ -229,7 +220,6 @@
   </div>
 </div>
 
-<!-- ── WHY US ── -->
 <div class="section" style="background:var(--primary-light);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
   <div class="section-inner">
     <div class="section-title" style="text-align:center;">Tại sao chọn chúng tôi?</div>
@@ -254,7 +244,6 @@
   </div>
 </div>
 
-<!-- ── FOOTER ── -->
 <footer class="site-footer">
   <div class="footer-grid">
     <div>
