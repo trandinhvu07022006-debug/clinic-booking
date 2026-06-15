@@ -57,10 +57,17 @@ public class DoctorAuthController {
         }
     }
 
-    @GetMapping("/verify-totp")
+   @GetMapping("/verify-totp")
     public String totpPage(HttpSession session, Model model) {
-        if (session.getAttribute("pendingDoctorUsername") == null)
+        String username = (String) session.getAttribute("pendingDoctorUsername");
+        if (username == null)
             return "redirect:/auth/doctor/login";
+
+        // [DEMO MODE] In mã TOTP hiện tại ra console để kiểm thử (chưa có app thật)
+        doctorService.findByUsername(username).ifPresent(d ->
+            totpService.printCurrentCodeForDemo(d.getTotpSecret(), username)
+        );
+
         model.addAttribute("clinicName", clinicName);
         return "auth/doctor-totp";
     }

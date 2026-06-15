@@ -23,6 +23,23 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 public class TOTPService {
+    /**
+     * [CHỈ DÙNG CHO DEMO] In mã TOTP hiện tại ra console.
+     *
+     * LƯU Ý BẢN CHẤT: TOTP KHÔNG gửi mã qua mạng — mã được sinh cục bộ trên
+     * app Authenticator của bác sĩ. Hàm này chỉ MÔ PHỎNG việc bác sĩ đọc mã
+     * từ điện thoại, bằng cách cho server tự tính mã (cùng thuật toán RFC 6238)
+     * và in ra Console để kiểm thử khi chưa có thiết bị thật.
+     */
+    public void printCurrentCodeForDemo(String secretKey, String username) {
+        int currentCode = gAuth.getTotpPassword(secretKey);
+        System.out.println("\n========== [TOTP - DEMO MODE] ==========");
+        System.out.println("Bác sĩ          : " + username);
+        System.out.println("Mã TOTP hiện tại : " + String.format("%06d", currentCode));
+        System.out.println("(Mã đổi mỗi 30 giây. Bình thường bác sĩ đọc mã này từ");
+        System.out.println(" app Google Authenticator trên điện thoại, KHÔNG gửi qua mạng.)");
+        System.out.println("========================================\n");
+    }
 
     private final GoogleAuthenticator gAuth;
 
