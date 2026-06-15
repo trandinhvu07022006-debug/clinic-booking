@@ -8,17 +8,26 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import jakarta.mail.internet.MimeMessage;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 
 /**
- * AppointmentOtpService — Transaction OTP cho đặt lịch.
+ * AppointmentOtpService — Transaction OTP cho đặt lịch khám.
  *
- * Khác với Login OTP:
- *   - OTP này gắn với 1 giao dịch cụ thể (appointmentId)
- *   - Email chứa thông tin lịch hẹn để bệnh nhân xác nhận đúng
- *   - Sau khi xác nhận, slot bị đánh dấu BOOKED ngay lập tức
+ * Vai trò: OTP "ký giao dịch" (Transaction Signing) — mỗi mã gắn chặt với
+ * MỘT lịch hẹn cụ thể (appointmentId + slot + bác sĩ), không phải OTP đăng nhập chung.
+ *
+ * Các lớp phòng thủ ATTT được hiện thực ở đây:
+ *   - (4.3.3) OTP được BĂM SHA-256 + Salt trước khi lưu DB (không lưu cleartext).
+ *   - (4.4)   So khớp bằng MessageDigest.isEqual() — Constant-time, chống Timing Attack.
+ *   - (4.3.1) Rate Limiting: khóa xác thực sau N lần nhập sai (chống Brute-force).
+ *   - (4.3.2) TTL: mã hết hạn theo otp.email.expiry-seconds.
+ *   - (4.3.4) Atomic Invalidation: xóa mã ngay sau lần xác thực thành công đầu tiên
+ *             (chống Replay Attack).
  */
 @Service
 public class AppointmentOtpService {
@@ -29,6 +38,9 @@ public class AppointmentOtpService {
 
     @Value("${otp.email.expiry-seconds:300}")
     private int expirySeconds;
+
+    @Value("${otp.max-attempts:5}")
+    private int maxAttempts;
 
     @Value("${spring.mail.username:no-reply@clinic.com}")
     private String fromEmail;
@@ -41,39 +53,109 @@ public class AppointmentOtpService {
         this.appointmentRepository = repo;
     }
 
+    // =================================================================
+    //  SINH MÃ + BĂM + LƯU  (mã gốc chỉ in ra console/gửi email, KHÔNG lưu DB)
+    // =================================================================
     public void sendConfirmationOtp(Appointment appointment) throws Exception {
+        // 1) Sinh mã OTP 6 số bằng CSPRNG (SecureRandom)
         String code = String.format("%06d", secureRandom.nextInt(1_000_000));
-        appointment.setOtpCode(code);
+
+        // 2) Sinh muối ngẫu nhiên 16 byte, riêng cho mỗi giao dịch
+        byte[] saltBytes = new byte[16];
+        secureRandom.nextBytes(saltBytes);
+        String salt = Base64.getEncoder().encodeToString(saltBytes);
+
+        // 3) Lưu BĂM của mã (không lưu mã gốc), kèm salt + TTL + reset bộ đếm sai
+        appointment.setOtpCode(hashOtp(code, salt));
+        appointment.setOtpSalt(salt);
+        appointment.setOtpAttempts(0);
         appointment.setOtpExpiry(LocalDateTime.now().plusSeconds(expirySeconds));
         appointmentRepository.save(appointment);
 
+        // 4) Soạn email (giữ nguyên template cũ)
         MimeMessage msg = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(msg, true, "UTF-8");
         helper.setFrom(fromEmail);
         helper.setTo(appointment.getPatientEmail());
         helper.setSubject("[" + clinicName + "] Xác nhận đặt lịch khám");
         helper.setText(buildEmailHtml(appointment, code), true);
-        
-        // TẠM TẮT LỆNH GỬI MAIL THẬT ĐỂ VƯỢT TƯỜNG LỬA RENDER
-        // mailSender.send(msg); 
-        
-        // IN MÃ OTP RA MÀN HÌNH LOGS CỦA RENDER
+
+        // TẠM TẮT GỬI MAIL THẬT (Mocking Mode) — IN MÃ GỐC RA CONSOLE/LOG
+        // mailSender.send(msg);
         System.out.println("\n=========================================");
-        System.out.println("MÃ OTP CỦA BỆNH NHÂN LÀ: " + code); 
+        System.out.println("MÃ OTP CỦA BỆNH NHÂN LÀ: " + code);
+        System.out.println("(Mã lưu trong DB ở dạng băm SHA-256 + Salt)");
         System.out.println("=========================================\n");
     }
 
+    // =================================================================
+    //  XÁC THỰC  (Rate Limiting + Constant-time + Atomic Invalidation)
+    // =================================================================
     public boolean verifyOtp(Appointment appointment, String inputCode) {
-        if (!appointment.isOtpValid(inputCode)) return false;
-        appointment.setOtpCode(null);
-        appointment.setOtpExpiry(null);
-        appointment.setOtpVerified(true);
-        appointment.setStatus(Appointment.AppointmentStatus.CONFIRMED);
-        appointment.setConfirmedAt(LocalDateTime.now());
-        appointmentRepository.save(appointment);
-        return true;
+        // (4.3.1) Rate Limiting — chặn trước khi tính toán băm để tiết kiệm CPU
+        if (appointment.getOtpAttempts() >= maxAttempts) {
+            throw new TooManyAttemptsException(
+                "Bạn đã nhập sai quá " + maxAttempts + " lần. Vui lòng yêu cầu mã OTP mới.");
+        }
+
+        // (4.3.2) Kiểm tra tồn tại + hết hạn TTL
+        if (appointment.getOtpCode() == null
+                || appointment.getOtpSalt() == null
+                || appointment.getOtpExpiry() == null
+                || LocalDateTime.now().isAfter(appointment.getOtpExpiry())) {
+            return false;
+        }
+
+        // Băm mã người dùng nhập với CÙNG salt đã lưu, rồi so khớp hai chuỗi băm
+        String computedHash = hashOtp(inputCode, appointment.getOtpSalt());
+
+        // (4.4) Constant-time comparison — chống Timing Attack
+        boolean isMatch = MessageDigest.isEqual(
+            computedHash.getBytes(StandardCharsets.UTF_8),
+            appointment.getOtpCode().getBytes(StandardCharsets.UTF_8)
+        );
+
+        if (isMatch) {
+            // (4.3.4) Atomic Invalidation — vô hiệu hóa mã ngay, chống Replay Attack
+            appointment.setOtpCode(null);
+            appointment.setOtpSalt(null);
+            appointment.setOtpExpiry(null);
+            appointment.setOtpAttempts(0);
+            appointment.setOtpVerified(true);
+            appointment.setStatus(Appointment.AppointmentStatus.CONFIRMED);
+            appointment.setConfirmedAt(LocalDateTime.now());
+            appointmentRepository.save(appointment);
+            return true;
+        } else {
+            // Nhập sai → tăng bộ đếm
+            appointment.setOtpAttempts(appointment.getOtpAttempts() + 1);
+            appointmentRepository.save(appointment);
+            return false;
+        }
     }
 
+    // =================================================================
+    //  HÀM BĂM: SHA-256(salt || code)
+    // =================================================================
+    private String hashOtp(String code, String salt) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            digest.update(Base64.getDecoder().decode(salt));        // trộn salt
+            byte[] hash = digest.digest(code.getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(hash);
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi băm OTP", e);
+        }
+    }
+
+    /** Ngoại lệ khi vượt quá số lần nhập sai cho phép. */
+    public static class TooManyAttemptsException extends RuntimeException {
+        public TooManyAttemptsException(String msg) { super(msg); }
+    }
+
+    // =================================================================
+    //  EMAIL TEMPLATE (giữ nguyên)
+    // =================================================================
     private String buildEmailHtml(Appointment appt, String code) {
         var slot = appt.getSlot();
         var dateStr = slot.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));

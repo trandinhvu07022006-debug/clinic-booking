@@ -9,12 +9,14 @@ com\clinic\controller\DoctorAuthController.class
 com\clinic\model\Doctor$DoctorStatus.class
 com\clinic\model\Appointment.class
 com\clinic\repository\AppointmentRepository.class
+com\clinic\service\AppointmentOtpService$TooManyAttemptsException.class
 com\clinic\service\DoctorService.class
 com\clinic\config\SecurityConfig$1.class
 com\clinic\controller\AdminController.class
 com\clinic\model\TimeSlot.class
 com\clinic\ClinicApplication.class
 com\clinic\config\SecurityConfig.class
+com\clinic\service\OtpCleanupService.class
 com\clinic\model\Doctor.class
 com\clinic\controller\DoctorDashboardController.class
 com\clinic\config\DataSeeder.class

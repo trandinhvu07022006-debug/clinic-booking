@@ -60,14 +60,28 @@ public class AppointmentService {
         return appt;
     }
 
+    // =====================================================================
+//  THAY THẾ HÀM confirmWithOtp() CŨ TRONG AppointmentService.java
+//  BẰNG HÀM DƯỚI ĐÂY (để bắt ngoại lệ Rate Limiting)
+// =====================================================================
+//
+//  Cũng cần thêm import ở đầu file:
+//    (không cần import gì mới — TooManyAttemptsException là inner class
+//     của AppointmentOtpService, tham chiếu qua tên đầy đủ bên dưới)
+
     /**
      * Xác nhận lịch hẹn bằng OTP.
-     * Nếu OTP sai/hết hạn → trả về false, slot vẫn giữ (user còn thời gian thử lại).
+     *  - OTP đúng & còn hạn  -> true  (slot chuyển CONFIRMED trong verifyOtp)
+     *  - OTP sai / hết hạn   -> false (slot vẫn giữ, user thử lại)
+     *  - Vượt quá số lần sai -> ném TooManyAttemptsException để controller báo rõ
      */
     public boolean confirmWithOtp(Long appointmentId, String otpCode) {
         return appointmentRepository.findById(appointmentId)
             .map(appt -> otpService.verifyOtp(appt, otpCode))
             .orElse(false);
+        // Ghi chú: TooManyAttemptsException (RuntimeException) sẽ tự động
+        // propagate lên Controller. Bắt nó ở Controller bằng try/catch hoặc
+        // @ExceptionHandler để trả HTTP 429 / thông báo "khóa tạm thời".
     }
 
     /**

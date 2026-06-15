@@ -32,8 +32,17 @@ public class Appointment {
     private AppointmentStatus status = AppointmentStatus.PENDING_OTP;
 
     // ✅ Transaction OTP fields
-    @Column(name = "otp_code", length = 6)
+    // otpCode giờ lưu GIÁ TRỊ ĐÃ BĂM (SHA-256 + Salt), dài ~44 ký tự Base64
+    @Column(name = "otp_code", length = 64)
     private String otpCode;
+
+    // Muối ngẫu nhiên (Base64, 16 byte) dùng kèm khi băm OTP
+    @Column(name = "otp_salt", length = 32)
+    private String otpSalt;
+
+    // Số lần nhập sai OTP cho lịch hẹn này (chống Brute-force)
+    @Column(name = "otp_attempts", nullable = false)
+    private int otpAttempts = 0;
 
     @Column(name = "otp_expiry")
     private LocalDateTime otpExpiry;
@@ -54,7 +63,8 @@ public class Appointment {
         PENDING_OTP,   // Chờ xác nhận OTP
         CONFIRMED,     // Đã xác nhận
         COMPLETED,     // Đã khám xong
-        CANCELLED      // Đã hủy
+        CANCELLED,     // Đã hủy
+        EXPIRED        // Hết hạn OTP (job dọn dẹp tự trả slot về AVAILABLE)
     }
 
     public Appointment() {}
@@ -91,4 +101,8 @@ public class Appointment {
     public void setConfirmedAt(LocalDateTime v) { confirmedAt = v; }
     public String getNotes() { return notes; }
     public void setNotes(String v) { notes = v; }
+    public String getOtpSalt() { return otpSalt; }
+    public void setOtpSalt(String otpSalt) { this.otpSalt = otpSalt; }
+    public int getOtpAttempts() { return otpAttempts; }
+    public void setOtpAttempts(int otpAttempts) { this.otpAttempts = otpAttempts; }
 }

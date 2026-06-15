@@ -10,32 +10,24 @@
   <link rel="stylesheet" th:href="@{/css/style.css}" />
   <style>
     /* ── HERO ── */
-    .page-bg{
-      position:fixed;
-      inset:0;
-      z-index:-1;
-      background:url('/images/benhvienbr.jpg') center 70% / cover no-repeat
-    }
-
     .hero-section {
       position: relative;
       padding: 5rem 1.5rem 4rem;
       text-align: center;
-      overflow: hidden;
-      background: transparent
-    }
-    .page-bg{
-      position:fixed;
-      inset:0;
-      z-index:-1;
-      background:url('/images/benhvienbr.jpg') center 70% / cover no-repeat
+      overflow: hidden
     }
 
-   .hero-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(10, 50, 35, .78) 0%, rgba(10, 50, 35, .35) 60%, rgba(10, 50, 35, .55) 100%)
-}
+    .hero-img {
+      position: absolute;
+      inset: 0;
+      background: url('/images/benhvienbr.jpg') center 30% / cover no-repeat
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(10, 50, 35, .25) 0%, rgba(10, 50, 35, .45) 100%)
+    }
 
     .hero-inner {
       position: relative;
@@ -129,23 +121,10 @@
     }
 
     /* ── TRUST STRIP ── */
-    body {
-  background: var(--bg)
-}
-
-.trust-strip {
-  background: #fff;
-  border-bottom: 1px solid var(--border);
-  position: relative;
-  z-index: 1
-}
-
-.section {
-  padding: 3rem 1.5rem;
-  background: var(--bg);
-  position: relative;
-  z-index: 1
-}
+    .trust-strip {
+      background: #fff;
+      border-bottom: 1px solid var(--border)
+    }
 
     .trust-inner {
       max-width: 900px;
@@ -373,8 +352,13 @@
     .why-section{
       position:relative;
       padding:3rem 1.5rem;
-      overflow:hidden;
-      background:transparent
+      overflow:hidden
+    }
+
+    .why-bg{
+      position:absolute;
+      inset:0;
+      background:url('/images/benhvienbr.jpg') center 70% / cover no-repeat
     }
 
    .why-overlay{
@@ -496,11 +480,8 @@
     }
 
     /* ── SECTION ── */
-   .section {
-      padding: 3rem 1.5rem;
-      background: var(--bg);
-      position: relative;
-      z-index: 1
+    .section {
+      padding: 3rem 1.5rem
     }
 
     .section-title {
@@ -537,7 +518,7 @@
 </head>
 
 <body style="background:var(--bg)">
-  <div class="page-bg"></div>
+
   <nav style="position:sticky;top:0;z-index:200;">
     <a class="nav-brand" th:href="@{/}">
       <img th:src="@{/images/logo.png}" alt="Logo Yên Lãng"
@@ -551,6 +532,7 @@
   </nav>
 
   <div class="hero-section">
+    <div class="hero-img"></div>
     <div class="hero-overlay"></div>
     <div class="hero-inner">
       <h1 th:text="${clinicName}">Phòng Khám Đa Khoa</h1>
@@ -662,6 +644,7 @@
   </div>
 
 <div class="why-section">
+    <div class="why-bg"></div>
     <div class="why-overlay"></div>
     <div class="section-inner" style="position:relative;z-index:1;">
       <div class="section-title" style="text-align:center;color:#fff;">Tại sao chọn chúng tôi?</div>
@@ -684,8 +667,8 @@
               <path d="M7 11V7a5 5 0 0110 0v4" />
             </svg>
           </div>
-          <div class="why-title">Xác nhận OTP bảo mật an toàn tiện lợi và nhanh chóng</div>
-          <div class="why-desc">Mỗi lịch hẹn được xác nhận bằng mã OTP gửi riêng tới email không ai có thể đặt lịch thay bạn và chúng tôi cam kết bảo vệ thông tin của bạn.</div>
+          <div class="why-title">Xác nhận OTP bảo mật</div>
+          <div class="why-desc">Mỗi lịch hẹn được xác nhận bằng mã OTP gửi riêng tới email — không ai có thể đặt lịch thay bạn.</div>
         </div>
 
         <div class="why-card">

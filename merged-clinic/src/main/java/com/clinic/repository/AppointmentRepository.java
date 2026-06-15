@@ -4,6 +4,7 @@ import com.clinic.model.Appointment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
@@ -34,4 +35,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Object[]> countGroupByStatus();
 
     List<Appointment> findByPatientEmailOrderByCreatedAtDesc(String email);
+
+    // Dùng cho OtpCleanupService: tìm các lịch còn chờ OTP nhưng đã quá hạn
+    List<Appointment> findByStatusAndOtpExpiryBefore(
+        Appointment.AppointmentStatus status, LocalDateTime time);
 }
