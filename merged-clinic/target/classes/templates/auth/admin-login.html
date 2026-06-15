@@ -21,7 +21,6 @@
       <div th:if="${param.logout}" class="alert alert-success">✓ Đã đăng xuất thành công.</div>
 
       <form th:action="@{/auth/admin/login}" method="post">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
         <div class="form-group">
           <label class="form-label">Tên đăng nhập</label>
           <input type="text" name="username" value="admin" required autofocus/>

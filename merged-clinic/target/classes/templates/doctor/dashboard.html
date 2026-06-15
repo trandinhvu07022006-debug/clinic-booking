@@ -140,11 +140,9 @@
                                    appt.status.name()=='PENDING_OTP'?'Chờ OTP':'Đã hủy'}"></span>
                   <div style="display:flex;gap:.35rem;" th:if="${appt.status.name()=='CONFIRMED'}">
                     <form th:action="@{'/doctor/appointment/'+${appt.id}+'/complete'}" method="post" style="display:inline">
-                      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                       <button type="submit" class="btn btn-primary btn-sm">✓</button>
                     </form>
                     <form th:action="@{'/doctor/appointment/'+${appt.id}+'/cancel'}" method="post" style="display:inline">
-                      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                       <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Hủy lịch hẹn?')">✕</button>
                     </form>
                   </div>
