@@ -68,10 +68,17 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">Email nhận OTP <span class="req">*</span></label>
-          <input type="email" name="patientEmail" required placeholder="email@example.com"/>
+          <label class="form-label">Nhận mã OTP qua <span class="req">*</span></label>
+          <div style="display:flex;gap:1.2rem;margin-top:.4rem;">
+            <label style="display:inline-flex;align-items:center;gap:.4rem;cursor:pointer;font-size:.9rem;">
+              <input type="radio" name="otpChannel" value="EMAIL" checked/> 📧 Email
+            </label>
+            <label style="display:inline-flex;align-items:center;gap:.4rem;cursor:pointer;font-size:.9rem;">
+              <input type="radio" name="otpChannel" value="SMS"/> 📱 SMS (tin nhắn)
+            </label>
+          </div>
           <div style="font-size:.78rem;color:var(--text-muted);margin-top:.3rem;font-style:italic;">
-            Mã OTP sẽ được gửi tới địa chỉ này — kiểm tra cả hộp thư rác.
+            Chọn Email để nhận mã qua hộp thư, hoặc SMS để nhận qua số điện thoại ở trên.
           </div>
         </div>
 

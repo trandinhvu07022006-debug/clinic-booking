@@ -135,11 +135,20 @@ public class BookingController {
                                 @RequestParam String patientEmail,
                                 @RequestParam String patientPhone,
                                 @RequestParam(required = false) String symptoms,
+                                @RequestParam(required = false, defaultValue = "EMAIL") String otpChannel,
                                 HttpSession session,
                                 RedirectAttributes redirectAttributes) {
         try {
+            // Đọc kênh người dùng chọn (EMAIL mặc định nếu không có)
+            AppointmentService.OtpChannel channel;
+            try {
+                channel = AppointmentService.OtpChannel.valueOf(otpChannel.toUpperCase());
+            } catch (Exception ex) {
+                channel = AppointmentService.OtpChannel.EMAIL;
+            }
+
             var appointment = appointmentService.createPendingAppointment(
-                slotId, patientName, patientEmail, patientPhone, symptoms);
+                slotId, patientName, patientEmail, patientPhone, symptoms, channel);
             session.setAttribute("pendingAppointmentId", appointment.getId());
             return "redirect:/booking/verify/" + appointment.getId();
 
@@ -147,7 +156,7 @@ public class BookingController {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/booking/form?slotId=" + slotId;
         } catch (Exception e) {
-            e.printStackTrace(); 
+            e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Lỗi thật sự là: " + e.getMessage());
             return "redirect:/booking/form?slotId=" + slotId;
         }

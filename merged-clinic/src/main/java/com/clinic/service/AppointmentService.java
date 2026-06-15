@@ -20,32 +20,36 @@ public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final TimeSlotRepository timeSlotRepository;
     private final AppointmentOtpService otpService;
+    private final SmsOtpService smsOtpService;
 
     public AppointmentService(AppointmentRepository ar, TimeSlotRepository ts,
-                               AppointmentOtpService otpService) {
-        this.appointmentRepository = ar;
-        this.timeSlotRepository = ts;
-        this.otpService = otpService;
-    }
+                           AppointmentOtpService otpService,
+                           SmsOtpService smsOtpService) {
+    this.appointmentRepository = ar;
+    this.timeSlotRepository = ts;
+    this.otpService = otpService;
+    this.smsOtpService = smsOtpService;
+}
 
     /**
      * Tạo lịch hẹn mới và gửi OTP xác nhận.
      * Slot bị giữ (BOOKED tạm) để tránh đặt trùng trong lúc chờ OTP.
      */
+   public enum OtpChannel { EMAIL, SMS }
+
     public Appointment createPendingAppointment(Long slotId, String name,
                                                  String email, String phone,
-                                                 String symptoms) throws Exception {
+                                                 String symptoms,
+                                                 OtpChannel channel) throws Exception {
         TimeSlot slot = timeSlotRepository.findById(slotId)
             .orElseThrow(() -> new IllegalArgumentException("Slot không tồn tại!"));
 
         if (slot.getStatus() != TimeSlot.SlotStatus.AVAILABLE)
             throw new IllegalStateException("Slot này đã được đặt, vui lòng chọn slot khác!");
 
-        // Giữ slot ngay lập tức
         slot.setStatus(TimeSlot.SlotStatus.BOOKED);
         timeSlotRepository.save(slot);
 
-        // Tạo appointment ở trạng thái chờ OTP
         Appointment appt = new Appointment();
         appt.setPatientName(name);
         appt.setPatientEmail(email);
@@ -55,8 +59,11 @@ public class AppointmentService {
         appt.setStatus(Appointment.AppointmentStatus.PENDING_OTP);
         appointmentRepository.save(appt);
 
-        // Gửi OTP xác nhận qua email
-        otpService.sendConfirmationOtp(appt);
+        if (channel == OtpChannel.SMS) {
+            smsOtpService.sendConfirmationSms(appt);
+        } else {
+            otpService.sendConfirmationOtp(appt);
+        }
         return appt;
     }
 
