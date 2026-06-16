@@ -42,6 +42,9 @@ public class BookingController {
     @Value("${clinic.address:}")
     private String clinicAddress;
 
+    @Value("${otp.max-attempts:5}")
+    private int maxAttempts;
+
     public BookingController(DoctorService ds, AppointmentService as, com.clinic.service.AppointmentOtpService os) {
         this.doctorService = ds;
         this.appointmentService = as;
@@ -179,14 +182,27 @@ public class BookingController {
     public String verifyOtp(@PathVariable Long id,
                             @RequestParam String otpCode,
                             Model model) {
-        boolean ok = appointmentService.confirmWithOtp(id, otpCode.trim());
-        if (ok) {
-            return "redirect:/booking/success/" + id;
+        var apptOpt = appointmentService.findById(id);
+        if (apptOpt.isEmpty()) return "redirect:/";
+        var appt = apptOpt.get();
+
+        try {
+            boolean ok = appointmentService.confirmWithOtp(id, otpCode.trim());
+            if (ok) {
+                return "redirect:/booking/success/" + id;
+            }
+            // Sai mã / hết hạn → báo số lần còn lại
+            int remaining = Math.max(maxAttempts - appt.getOtpAttempts(), 0);
+            model.addAttribute("error",
+                "Mã OTP không đúng hoặc đã hết hạn! Còn " + remaining + " lần thử.");
+        } catch (com.clinic.service.AppointmentOtpService.TooManyAttemptsException e) {
+            // Vượt quá số lần cho phép → khóa xác thực
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("locked", true);
         }
-        var appt = appointmentService.findById(id);
-        model.addAttribute("appointment", appt.orElse(null));
-        model.addAttribute("maskedEmail", appt.map(a -> maskEmail(a.getPatientEmail())).orElse("***"));
-        model.addAttribute("error", "Mã OTP không đúng hoặc đã hết hạn!");
+
+        model.addAttribute("appointment", appt);
+        model.addAttribute("maskedEmail", maskEmail(appt.getPatientEmail()));
         model.addAttribute("clinicName", clinicName);
         return "patient/verify-otp";
     }

@@ -31,8 +31,8 @@
     </div>
 
     <div class="card-body">
-      <!-- Countdown -->
-      <div style="margin-bottom:1.25rem;">
+      <!-- Countdown (ẩn khi bị khóa) -->
+      <div style="margin-bottom:1.25rem;" th:if="${locked == null}">
         <div class="countdown-track"><div class="countdown-fill" id="cFill" style="width:100%"></div></div>
         <div style="text-align:center;font-size:.82rem;color:var(--primary);margin-top:.4rem;font-style:italic;" id="cLabel">
           ⏱ Còn lại 5:00
@@ -43,8 +43,8 @@
       <div th:if="${error}"   class="alert alert-error">⚠️ <span th:text="${error}"></span></div>
       <div th:if="${message}" class="alert alert-success">✓ <span th:text="${message}"></span></div>
 
-      <!-- OTP form -->
-      <form th:action="@{/booking/verify/{id}(id=${appointment.id})}" method="post">
+      <!-- OTP form (ẩn khi bị khóa quá số lần thử) -->
+      <form th:action="@{/booking/verify/{id}(id=${appointment.id})}" method="post" th:if="${locked == null}">
         <div style="text-align:center;margin-bottom:.75rem;font-size:.88rem;color:var(--text-sub);">
           Nhập mã 6 chữ số
         </div>
@@ -73,6 +73,11 @@
         </button>
       </form>
 
+      <!-- Thông báo khi bị khóa -->
+      <div th:if="${locked != null}" style="text-align:center;padding:.5rem 0 1rem;color:var(--text-sub);font-size:.9rem;">
+        Bạn đã nhập sai quá số lần cho phép. Vui lòng yêu cầu mã OTP mới để tiếp tục.
+      </div>
+
       <!-- Resend -->
       <form th:action="@{/booking/resend-otp/{id}(id=${appointment.id})}" method="post" style="margin-top:.75rem;">
         <button type="submit" class="btn btn-outline btn-full">
@@ -84,35 +89,42 @@
 </div>
 
 <script>
-// Auto-advance OTP inputs
+// Auto-advance OTP inputs (chỉ chạy khi form tồn tại)
 const boxes = document.querySelectorAll('.otp-box');
 const hidden = document.getElementById('otpHidden');
-const update = () => hidden.value = Array.from(boxes).map(b=>b.value).join('');
-boxes.forEach((b,i)=>{
-  b.addEventListener('input',()=>{
-    b.value = b.value.replace(/\D/g,'');
-    update();
-    if(b.value && boxes[i+1]) boxes[i+1].focus();
-    if(hidden.value.length===6) document.getElementById('submitBtn').style.background='var(--primary-dark)';
+if (boxes.length && hidden) {
+  const update = () => hidden.value = Array.from(boxes).map(b=>b.value).join('');
+  boxes.forEach((b,i)=>{
+    b.addEventListener('input',()=>{
+      b.value = b.value.replace(/\D/g,'');
+      update();
+      if(b.value && boxes[i+1]) boxes[i+1].focus();
+      if(hidden.value.length===6){
+        const sb = document.getElementById('submitBtn');
+        if(sb) sb.style.background='var(--primary-dark)';
+      }
+    });
+    b.addEventListener('keydown',e=>{
+      if(e.key==='Backspace'&&!b.value&&boxes[i-1]) boxes[i-1].focus();
+    });
   });
-  b.addEventListener('keydown',e=>{
-    if(e.key==='Backspace'&&!b.value&&boxes[i-1]) boxes[i-1].focus();
-  });
-});
+}
 
-// Countdown 5 minutes
-let secs = 300;
+// Countdown 5 minutes (chỉ chạy khi còn ô đếm ngược)
 const fill = document.getElementById('cFill');
 const lbl  = document.getElementById('cLabel');
-const timer = setInterval(()=>{
-  secs--;
-  if(secs<=0){ clearInterval(timer); lbl.textContent='⏱ Mã đã hết hạn — gửi lại.'; fill.style.width='0%'; fill.style.background='#c0392b'; return; }
-  const pct = Math.round(secs/300*100);
-  fill.style.width = pct+'%';
-  if(secs<60){ fill.style.background='#c0392b'; }
-  const m = Math.floor(secs/60), s = secs%60;
-  lbl.textContent = `⏱ Còn lại ${m}:${String(s).padStart(2,'0')}`;
-},1000);
+if (fill && lbl) {
+  let secs = 300;
+  const timer = setInterval(()=>{
+    secs--;
+    if(secs<=0){ clearInterval(timer); lbl.textContent='⏱ Mã đã hết hạn — gửi lại.'; fill.style.width='0%'; fill.style.background='#c0392b'; return; }
+    const pct = Math.round(secs/300*100);
+    fill.style.width = pct+'%';
+    if(secs<60){ fill.style.background='#c0392b'; }
+    const m = Math.floor(secs/60), s = secs%60;
+    lbl.textContent = `⏱ Còn lại ${m}:${String(s).padStart(2,'0')}`;
+  },1000);
+}
 </script>
 <script th:src="@{/js/app.js}"></script>
 </body>
