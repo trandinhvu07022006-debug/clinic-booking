@@ -32,6 +32,7 @@ public class BookingController {
     private final DoctorService doctorService;
     private final AppointmentService appointmentService;
     private final com.clinic.service.AppointmentOtpService otpService;
+    private final com.clinic.service.SmsOtpService smsOtpService;
 
     @Value("${clinic.name:Phòng Khám Demo}")
     private String clinicName;
@@ -45,10 +46,13 @@ public class BookingController {
     @Value("${otp.max-attempts:5}")
     private int maxAttempts;
 
-    public BookingController(DoctorService ds, AppointmentService as, com.clinic.service.AppointmentOtpService os) {
+    public BookingController(DoctorService ds, AppointmentService as,
+                             com.clinic.service.AppointmentOtpService os,
+                             com.clinic.service.SmsOtpService sms) {
         this.doctorService = ds;
         this.appointmentService = as;
         this.otpService = os;
+        this.smsOtpService = sms;
     }
 
     // ==================== TRANG CHỦ — Chọn bác sĩ ====================
@@ -153,6 +157,8 @@ public class BookingController {
             var appointment = appointmentService.createPendingAppointment(
                 slotId, patientName, patientEmail, patientPhone, symptoms, channel);
             session.setAttribute("pendingAppointmentId", appointment.getId());
+            // Lưu kênh OTP theo từng lịch hẹn để trang verify hiển thị đúng (Email/SMS)
+            session.setAttribute("otpChannel_" + appointment.getId(), channel.name());
             return "redirect:/booking/verify/" + appointment.getId();
 
         } catch (IllegalStateException e) {
@@ -172,15 +178,14 @@ public class BookingController {
         var appt = appointmentService.findById(id);
         if (appt.isEmpty()) return "redirect:/";
 
-        model.addAttribute("appointment", appt.get());
-        model.addAttribute("maskedEmail", maskEmail(appt.get().getPatientEmail()));
-        model.addAttribute("clinicName", clinicName);
+        addVerifyAttributes(model, appt.get(), readChannel(session, id));
         return "patient/verify-otp";
     }
 
     @PostMapping("/booking/verify/{id}")
     public String verifyOtp(@PathVariable Long id,
                             @RequestParam String otpCode,
+                            HttpSession session,
                             Model model) {
         var apptOpt = appointmentService.findById(id);
         if (apptOpt.isEmpty()) return "redirect:/";
@@ -201,14 +206,13 @@ public class BookingController {
             model.addAttribute("locked", true);
         }
 
-        model.addAttribute("appointment", appt);
-        model.addAttribute("maskedEmail", maskEmail(appt.getPatientEmail()));
-        model.addAttribute("clinicName", clinicName);
+        addVerifyAttributes(model, appt, readChannel(session, id));
         return "patient/verify-otp";
     }
 
     @PostMapping("/booking/resend-otp/{id}")
     public String resendOtp(@PathVariable Long id,
+                            HttpSession session,
                             RedirectAttributes ra) {
         var apptOpt = appointmentService.findById(id);
         if (apptOpt.isEmpty()) return "redirect:/";
@@ -221,11 +225,17 @@ public class BookingController {
         }
 
         try {
-            // ĐÃ SỬA LỖI TẠI ĐÂY: sendOtp -> sendConfirmationOtp
-            otpService.sendConfirmationOtp(appt);          // reset + gửi OTP mới
-            ra.addFlashAttribute("message", "✓ Đã gửi lại mã OTP. Kiểm tra hộp thư (kể cả thư rác).");
+            // Gửi lại ĐÚNG kênh người dùng đã chọn (Email hoặc SMS)
+            String channel = readChannel(session, id);
+            if ("SMS".equalsIgnoreCase(channel)) {
+                smsOtpService.sendConfirmationSms(appt);
+                ra.addFlashAttribute("message", "✓ Đã gửi lại mã OTP qua SMS. Kiểm tra tin nhắn điện thoại.");
+            } else {
+                otpService.sendConfirmationOtp(appt);
+                ra.addFlashAttribute("message", "✓ Đã gửi lại mã OTP qua Email. Kiểm tra hộp thư (kể cả thư rác).");
+            }
         } catch (Exception e) {
-            ra.addFlashAttribute("error", "Không thể gửi lại email. Vui lòng thử lại sau.");
+            ra.addFlashAttribute("error", "Không thể gửi lại mã OTP. Vui lòng thử lại sau.");
         }
         return "redirect:/booking/verify/" + id;
     }
@@ -249,10 +259,32 @@ public class BookingController {
         return "redirect:/?cancelled=true";
     }
 
+    // ==================== Helpers ====================
+
+    /** Đọc kênh OTP đã lưu trong session theo id lịch hẹn (mặc định EMAIL). */
+    private String readChannel(HttpSession session, Long id) {
+        Object ch = session.getAttribute("otpChannel_" + id);
+        return (ch != null) ? ch.toString() : "EMAIL";
+    }
+
+    /** Gom các attribute dùng chung cho trang verify-otp, hiển thị đúng theo kênh. */
+    private void addVerifyAttributes(Model model, com.clinic.model.Appointment appt, String channel) {
+        model.addAttribute("appointment", appt);
+        model.addAttribute("otpChannel", channel);
+        model.addAttribute("maskedEmail", maskEmail(appt.getPatientEmail()));
+        model.addAttribute("maskedPhone", maskPhone(appt.getPatientPhone()));
+        model.addAttribute("clinicName", clinicName);
+    }
+
     private String maskEmail(String email) {
         if (email == null || !email.contains("@")) return "***";
         String[] p = email.split("@");
         int n = Math.min(3, p[0].length());
         return p[0].substring(0, n) + "***@" + p[1];
+    }
+
+    private String maskPhone(String phone) {
+        if (phone == null || phone.length() < 4) return "***";
+        return "***" + phone.substring(phone.length() - 3);
     }
 }

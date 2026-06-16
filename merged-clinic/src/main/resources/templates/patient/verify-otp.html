@@ -8,14 +8,31 @@
 </head>
 <body style="background:var(--bg);padding:1.5rem 1rem;">
 
+<!-- Xác định kênh: true nếu là SMS -->
+<div th:with="isSms=${otpChannel != null and otpChannel == 'SMS'}">
+
 <div class="container-sm">
   <div class="card">
     <div class="card-header" style="text-align:center;padding:2rem 1.75rem 1.5rem;">
-      <div class="check-circle" style="width:68px;height:68px;font-size:1.8rem;">📧</div>
-      <h2 style="margin-bottom:.35rem;">Kiểm tra email của bạn</h2>
+      <!-- Icon + tiêu đề đổi theo kênh -->
+      <div class="check-circle" style="width:68px;height:68px;font-size:1.8rem;"
+           th:text="${isSms} ? '📱' : '📧'">📧</div>
+      <h2 style="margin-bottom:.35rem;"
+          th:text="${isSms} ? 'Kiểm tra tin nhắn điện thoại' : 'Kiểm tra email của bạn'">
+        Kiểm tra email của bạn
+      </h2>
       <p class="sub">
-        Mã OTP gửi tới: <strong th:text="${maskedEmail}"></strong><br/>
-        Hiệu lực <strong>5 phút</strong> — kiểm tra cả thư rác.
+        <!-- Dòng SMS -->
+        <span th:if="${isSms}">
+          Mã OTP gửi tới: <strong th:text="${maskedPhone}"></strong><br/>
+        </span>
+        <!-- Dòng Email -->
+        <span th:unless="${isSms}">
+          Mã OTP gửi tới: <strong th:text="${maskedEmail}"></strong><br/>
+        </span>
+        Hiệu lực <strong>5 phút</strong> —
+        <span th:if="${isSms}">kiểm tra hộp tin nhắn.</span>
+        <span th:unless="${isSms}">kiểm tra cả thư rác.</span>
       </p>
     </div>
 
@@ -86,6 +103,8 @@
       </form>
     </div>
   </div>
+</div>
+
 </div>
 
 <script>
